@@ -1,0 +1,45 @@
+Unit DeleteCategory;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids;
+
+Type
+    TFormDeleteCategory = class(TForm)
+        LabelName: TLabel;
+        StringGridCategory: TStringGrid;
+        ButtonExecute: TButton;
+        EditName: TEdit;
+        LabelWarningIndex: TLabel;
+    procedure FormShow(Sender: TObject);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+  FormDeleteCategory: TFormDeleteCategory;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, Category, UnitProcedure;
+
+
+
+Procedure TFormDeleteCategory.FormShow(Sender: TObject);
+Begin
+    EditName.Clear;
+    SetStartCategory(StringGridCategory);
+    FillCategory(StringGridCategory);
+End;
+
+
+
+
+End.

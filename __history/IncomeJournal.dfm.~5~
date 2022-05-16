@@ -1,0 +1,128 @@
+object FormIncomeJournal: TFormIncomeJournal
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = 'FormIncomeJournal'
+  ClientHeight = 602
+  ClientWidth = 858
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  OnClose = FormClose
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object LabelAccount: TLabel
+    Left = 64
+    Top = 418
+    Width = 36
+    Height = 16
+    Caption = #1057#1095#1105#1090':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelAmount: TLabel
+    Left = 224
+    Top = 418
+    Width = 49
+    Height = 16
+    Caption = #1057#1091#1084#1084#1072':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelDate: TLabel
+    Left = 360
+    Top = 418
+    Width = 38
+    Height = 16
+    Caption = #1044#1072#1090#1072':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelComment: TLabel
+    Left = 487
+    Top = 418
+    Width = 94
+    Height = 16
+    Caption = #1050#1086#1084#1084#1077#1085#1090#1072#1088#1080#1081':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object StringGridJournal: TStringGrid
+    Left = 64
+    Top = 25
+    Width = 670
+    Height = 369
+    FixedCols = 0
+    RowCount = 1
+    FixedRows = 0
+    TabOrder = 0
+    OnDrawCell = StringGridJournalDrawCell
+  end
+  object ComboBoxAccount: TComboBox
+    Left = 64
+    Top = 440
+    Width = 145
+    Height = 21
+    Style = csDropDownList
+    TabOrder = 1
+    OnChange = ComboBoxAccountChange
+    OnDropDown = ComboBoxAccountDropDown
+  end
+  object EditAmount: TEdit
+    Left = 224
+    Top = 440
+    Width = 121
+    Height = 21
+    MaxLength = 8
+    TabOrder = 2
+    OnKeyPress = EditAmountKeyPress
+  end
+  object ButtonExecute: TButton
+    Left = 560
+    Top = 480
+    Width = 99
+    Height = 25
+    Caption = #1055#1086#1087#1086#1083#1085#1080#1090#1100' '#1089#1095#1105#1090
+    TabOrder = 3
+    OnClick = ButtonExecuteClick
+  end
+  object EditComment: TEdit
+    Left = 487
+    Top = 440
+    Width = 154
+    Height = 21
+    TabOrder = 4
+  end
+  object DateTimePickerJournal: TDateTimePicker
+    Left = 360
+    Top = 440
+    Width = 98
+    Height = 21
+    Date = 44674.000000000000000000
+    Time = 0.941340486111585100
+    TabOrder = 5
+  end
+end

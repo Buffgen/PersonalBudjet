@@ -1,0 +1,53 @@
+object FormAccount: TFormAccount
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = #1057#1095#1077#1090#1072
+  ClientHeight = 255
+  ClientWidth = 667
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object StringGridAccount: TStringGrid
+    Left = 136
+    Top = 8
+    Width = 480
+    Height = 217
+    ColCount = 3
+    DefaultColWidth = 144
+    FixedCols = 0
+    RowCount = 1
+    FixedRows = 0
+    TabOrder = 0
+    OnDrawCell = StringGridAccountDrawCell
+    RowHeights = (
+      24)
+  end
+  object ButtonCreate: TButton
+    Left = 29
+    Top = 80
+    Width = 75
+    Height = 25
+    Caption = #1057#1086#1079#1076#1072#1090#1100
+    TabOrder = 1
+    OnClick = ButtonCreateClick
+  end
+  object ButtonDelete: TButton
+    Left = 29
+    Top = 144
+    Width = 75
+    Height = 25
+    Caption = #1059#1076#1072#1083#1080#1090#1100
+    TabOrder = 2
+    OnClick = ButtonDeleteClick
+  end
+end

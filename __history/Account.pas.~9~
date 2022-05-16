@@ -1,0 +1,234 @@
+Unit Account;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Grids, CreateAccount, DeleteAccount;
+
+Type
+    TFormAccount = class(TForm)
+        LabelWarning: TLabel;
+        StringGridAccount: TStringGrid;
+        ButtonExecute: TButton;
+        ComboBoxParameters: TComboBox;
+        EditIndex: TEdit;
+        LabelActionAccount: TLabel;
+        EditNumber: TEdit;
+        EditBalance: TEdit;
+        LabelIndex: TLabel;
+        LabelNumber: TLabel;
+        LabelBalance: TLabel;
+        ButtonCreate: TButton;
+        ButtonDelete: TButton;
+
+    Procedure FormShow(Sender: TObject);
+    Procedure ComboBoxParametersChange(Sender: TObject);
+    Procedure ComboBoxParametersKeyPress(Sender: TObject; var Key: Char);
+    Procedure ComboBoxParametersClick(Sender: TObject);
+    Procedure StringGridAccountSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+    Procedure ButtonExecuteClick(Sender: TObject);
+    Procedure EditIndexChange(Sender: TObject);
+    Procedure EditNumberChange(Sender: TObject);
+    Procedure EditBalanceChange(Sender: TObject);
+    Procedure StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    Procedure EditIndexKeyPress(Sender: TObject; var Key: Char);
+    Procedure EditBalanceKeyPress(Sender: TObject; var Key: Char);
+    procedure ButtonCreateClick(Sender: TObject);
+    procedure ButtonDeleteClick(Sender: TObject);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormAccount: TFormAccount;
+
+Implementation
+    {$R *.dfm}
+    
+Uses
+    Main, UnitProcedure;
+
+
+//    Case ComboBoxParameters.ItemIndex of
+//    0:
+//        Begin
+//            If StrToInt(EditIndex.Text) > StringGridAccount.RowCount - 1 then
+//                LabelWarning.Visible := True
+//            Else
+//            Begin
+//                LabelWarning.Visible := False;
+//                AccountList := HeadAccount;
+//                For I := 1 to StrToInt(EditIndex.Text) do
+//                    AccountList := AccountList^.Next;
+//
+//                AccountList^.Balance := AccountList^.Balance + StrToFloat(EditBalance.Text);
+//
+//                StringGridAccount.Cells[2, StrToInt(EditIndex.Text)] := FloatToStr(AccountList^.Balance);
+//                ClearEdits();
+//            End;
+//        En
+
+
+Procedure TFormAccount.FormShow(Sender: TObject);
+Begin
+    FillGridAccount(StringGridAccount);
+End;
+
+
+Procedure TFormAccount.ButtonCreateClick(Sender: TObject);
+Begin
+    FormCreateAccount.Show;
+End;
+
+
+Procedure TFormAccount.ButtonDeleteClick(Sender: TObject);
+Begin
+    FormDeleteAccount.Show;
+End;
+
+
+Procedure TFormAccount.ButtonExecuteClick(Sender: TObject);
+Var
+    //Salary: Double;
+    I, J: Integer;
+    CurrentPointer: PAccount;
+Begin
+    1:
+
+    2:
+
+        Begin
+            If StrToInt(EditIndex.Text) > StringGridAccount.RowCount - 1 then
+                LabelWarning.Visible := True
+            Else
+            Begin
+                LabelWarning.Visible := False;
+                AccountList := HeadAccount;
+                For I := 1 to StrToInt(EditIndex.Text) - 1 do
+                    AccountList := AccountList^.Next;
+
+                CurrentPointer := AccountList^.Next;
+                AccountList^.Next := CurrentPointer^.Next;
+                CurrentPointer^.Next := nil;
+                Dispose(CurrentPointer);
+                HeadAccount^.ID := HeadAccount^.ID - 1;
+
+                For I := StrToInt(EditIndex.Text) to StringGridAccount.RowCount - 1 do
+                Begin
+                    For J := 0 to 2 do
+                        StringGridAccount.Cells[J,I] := StringGridAccount.Cells[J,I + 1];
+                End;
+                StringGridAccount.RowCount := StringGridAccount.RowCount - 1;
+                ClearEdits();
+            End;
+        End;
+    End;   
+End;
+
+
+Procedure TFormAccount.ComboBoxParametersClick(Sender: TObject);
+Begin
+    ComboBoxParameters.SelLength := 0;
+End;
+
+
+Procedure TFormAccount.ComboBoxParametersKeyPress(Sender: TObject; Var Key: Char);
+Begin
+    Key := #0;
+End;
+
+
+Procedure CheckEditForButton(LineFirst, LineSecond, LineThird: String; Button: TButton);
+Begin
+    If (Length(LineFirst) = 0) or (Length(LineSecond) = 0) or (Length(LineThird) = 0) then
+        Button.Enabled := False
+    Else
+        Button.Enabled := True;
+End;
+
+
+Procedure TFormAccount.EditBalanceChange(Sender: TObject);
+Begin
+    CheckEditForButton(EditIndex.Text, EditNumber.Text, EditBalance.Text, ButtonExecute);
+End;
+
+
+Procedure TFormAccount.EditBalanceKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := CheckKeyEditMoney(EditBalance.Text, EditBalance.SelStart, EditBalance.Sellength, Key);
+End;
+
+Procedure TFormAccount.EditIndexChange(Sender: TObject);
+Begin
+    CheckEditForButton(EditIndex.Text, EditNumber.Text, EditBalance.Text, ButtonExecute);
+End;
+
+
+Procedure TFormAccount.EditIndexKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := CheckKeyEditIndex(EditIndex.Text, EditIndex.SelStart, EditIndex.Sellength, Key);
+End;
+
+
+procedure TFormAccount.EditNumberChange(Sender: TObject);
+Begin
+    CheckEditForButton(EditIndex.Text, EditNumber.Text, EditBalance.Text, ButtonExecute);
+End;
+
+
+Procedure TFormAccount.ComboBoxParametersChange(Sender: TObject);
+Begin
+    EditIndex.Enabled := False;
+    EditNumber.Enabled := False;
+    EditBalance.Enabled := False;
+    If (ComboBoxParameters.ItemIndex = 0) and (StringGridAccount.Cells[0, 1] <> '') then
+    Begin
+        EditIndex.Enabled := True;
+        EditNumber.Enabled := False;
+        EditBalance.Enabled := True;
+    End
+    Else If (ComboBoxParameters.ItemIndex = 1) then
+    Begin
+        EditIndex.Text := IntToStr(HeadAccount^.ID + 1);
+        EditIndex.Enabled := False;
+        EditNumber.Enabled := True;
+        EditBalance.Enabled := True;
+    End
+    Else If (ComboBoxParameters.ItemIndex = 2) and (StringGridAccount.Cells[0, 1] <> '')  then
+    Begin
+        EditIndex.Enabled := True;
+        EditNumber.Enabled := False;
+        EditBalance.Enabled := False;
+    End;
+End;
+
+
+Procedure TFormAccount.StringGridAccountDrawCell(Sender: TObject; ACol,ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    FillColorInGrid(StringGridAccount, ACol, ARow, Rect, State);
+End;
+
+Procedure TFormAccount.StringGridAccountSelectCell(Sender: TObject; ACol, ARow: Integer; Var CanSelect: Boolean);
+Begin
+    If ARow <> 0 then
+    Begin
+        If (ComboBoxParameters.ItemIndex = 0) then
+        Begin
+            EditIndex.Text := StringGridAccount.Cells[0, ARow];
+            EditNumber.Text := StringGridAccount.Cells[1, ARow];
+            EditBalance.Text := '0';
+        End
+        Else If (ComboBoxParameters.ItemIndex = 2)  then
+        Begin
+            EditIndex.Text := StringGridAccount.Cells[0, ARow];
+            EditNumber.Text := StringGridAccount.Cells[1, ARow];
+            EditBalance.Text := StringGridAccount.Cells[2, ARow];
+        End;
+    End;
+End;
+
+End.

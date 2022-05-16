@@ -1,0 +1,176 @@
+Unit ExpenseJournal;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls, ChoiceAccount, ChoiceCategory;
+
+Type
+    TFormExpenseJournal = class(TForm)
+        StringGridJournal: TStringGrid;
+        ComboBoxAccount: TComboBox;
+        EditAmount: TEdit;
+        ButtonExecute: TButton;
+        LabelNumber: TLabel;
+    LabelAmount: TLabel;
+        EditDate: TEdit;
+        LabelDate: TLabel;
+        ComboBoxCategory: TComboBox;
+    LabelCategory: TLabel;
+
+    procedure FormShow(Sender: TObject);
+    procedure ButtonExecuteClick(Sender: TObject);
+    procedure ComboBoxAccountDropDown(Sender: TObject);
+    procedure ComboBoxCategoryDropDown(Sender: TObject);
+    procedure ComboBoxAccountChange(Sender: TObject);
+    procedure ComboBoxCategoryChange(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+
+    Private
+        Procedure AddNewJournalElement();
+        Procedure AddNewJournalStringGrid();
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormExpenseJournal: TFormExpenseJournal;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, Journal;
+
+
+
+Procedure TFormExpenseJournal.FormShow(Sender: TObject);
+Begin
+    TempComboCategory := '';
+    TempComboAccount := '';
+    EditAmount.Clear;
+    EditDate.Clear;
+    SetStartJournal(StringGridJournal);
+    FillJournal(StringGridJournal);
+End;
+
+
+Procedure TFormExpenseJournal.AddNewJournalElement();
+Begin
+    Inc(MaxJournalID);
+    PointerJournal := TailJournal;
+    New(PointerJournal^.Next);
+    PointerJournal := PointerJournal^.Next;
+    PointerJournal^.Next := Nil;
+    PointerJournal^.ID := MaxJournalID;
+    PointerJournal^.Account := ComboBoxAccount.Text;
+    PointerJournal^.Amount := StrToFloat(EditAmount.Text);
+    PointerJournal^.CategoryName := ComboBoxCategory.Text;
+    TailJournal := PointerJournal;
+    HeadJournal^.ID := HeadJournal^.ID + 1;
+End;
+
+
+Procedure TFormExpenseJournal.AddNewJournalStringGrid();
+Begin
+    With StringGridJournal do
+    Begin
+        RowCount :=  RowCount + 1;
+        Cells[0, RowCount - 1] := PointerJournal^.Account;
+        Cells[1, RowCount - 1] := PointerJournal^.CategoryName;
+        Cells[2, RowCount - 1] := FloatToStr(PointerJournal^.Amount);
+        Cells[3, RowCount - 1] := PointerJournal^.Date;
+    End;
+End;
+
+
+Procedure TFormExpenseJournal.ButtonExecuteClick(Sender: TObject);
+Begin
+    AddNewJournalElement();
+    AddNewJournalStringGrid();
+    ComboBoxAccount.Text := '';
+    ComboBoxCategory.Text := '';
+    EditAmount.Clear;
+    EditDate.Clear;
+End;
+
+
+Procedure TFormExpenseJournal.ComboBoxAccountDropDown(Sender: TObject);
+Var
+    I: Integer;
+Begin
+    ComboBoxAccount.Items.Clear;
+    PointerAccount := HeadAccount^.Next;
+    I := 0;
+    While (I < 5) and (PointerAccount <> nil) do
+    Begin
+        ComboBoxAccount.Items.Add(PointerAccount^.Number);
+        PointerAccount := PointerAccount^.Next;
+        Inc(I);
+    End;
+    If PointerAccount <> nil then
+    Begin
+        If TempComboAccount <> '' then
+            ComboBoxAccount.Items.Add(TempComboAccount);
+        ComboBoxAccount.Items.Add('Другой счёт...');
+    End;
+End;
+
+
+Procedure TFormExpenseJournal.ComboBoxCategoryDropDown(Sender: TObject);
+Var
+    I: Integer;
+    Linne: String;
+Begin
+    ComboBoxCategory.Items.Clear;
+    ComboBoxCategory.Items.Clear;
+    PointerCategory := HeadCategory^.Next;
+    I := 0;
+    While (I < 5) and (PointerCategory <> nil) do
+    Begin
+        ComboBoxCategory.Items.Add(PointerCategory^.Name);
+        PointerCategory := PointerCategory^.Next;
+        Inc(I);
+    End;
+    If PointerCategory <> nil then
+    Begin
+        If TempComboCategory <> '' then
+            ComboBoxCategory.Items.Add(TempComboCategory);
+        ComboBoxCategory.Items.Add('Другая категория...');
+    End;
+End;
+
+
+Procedure TFormExpenseJournal.ComboBoxAccountChange(Sender: TObject);
+Begin
+    If TempComboAccount <> '' then
+    Begin
+        If ComboBoxAccount.ItemIndex = 6 then
+            FormChoiceAccount.Show
+    End
+    Else If ComboBoxAccount.ItemIndex = 5 then
+        FormChoiceAccount.Show
+End;
+
+
+Procedure TFormExpenseJournal.ComboBoxCategoryChange(Sender: TObject);
+Begin
+    If TempComboCategory <> '' then
+    Begin
+        If ComboBoxCategory.ItemIndex = 6 then
+            FormChoiceCategory.Show
+    End
+    Else If ComboBoxCategory.ItemIndex = 5 then
+        FormChoiceCategory.Show
+End;
+
+
+Procedure TFormExpenseJournal.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    FillJournal(FormJournal.StringGridJournal);
+    TempComboCategory := '';
+    TempComboAccount := '';
+End;
+
+End.

@@ -1,0 +1,60 @@
+unit Settings;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.ExtCtrls, Vcl.StdCtrls, VCL.Themes, IniFiles;
+
+type
+  TFormSettings = class(TForm)
+    PanelSettings: TPanel;
+    ComboBoxUIStyle: TComboBox;
+    LabelUIStyle: TLabel;
+    procedure ComboBoxUIStyleChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FormSettings: TFormSettings;
+
+implementation
+
+Uses
+    Main;
+
+{$R *.dfm}
+
+//------------------------------------------------------------------------------
+Procedure TFormSettings.ComboBoxUIStyleChange(Sender: TObject);
+Begin
+    FormMain.PageControlMain.ActivePageIndex := 0;
+    TStyleManager.TrySetStyle(ComboBoxUIStyle.Text, false);
+End;
+
+
+
+//------------------------------------------------------------------------------
+Procedure TFormSettings.FormCreate(Sender: TObject);
+Var
+  StyleManager: TStyleManager;
+  I: integer;
+  StyleName: String;
+  IniFile: TIniFile;
+Begin
+    StyleManager := TStyleManager.Create;
+    For I := 0 to Length(StyleManager.StyleNames) - 1 do
+        ComboBoxUIStyle.Items.Add(StyleManager.StyleNames[I]);
+
+    FormMain.PageControlMain.ActivePage := FormMain.TabAccounts;
+    ComboBoxUIStyle.ItemIndex := ComboBoxUIStyle.Items.IndexOf(StyleManager.ActiveStyle.Name);
+
+End;
+
+
+End.

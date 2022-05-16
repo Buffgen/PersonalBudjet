@@ -1,0 +1,156 @@
+Unit DeleteAccount;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids;
+
+Type
+    TFormDeleteAccount = class(TForm)
+        LabelIndex: TLabel;
+        LabelNumber: TLabel;
+        EditIndex: TEdit;
+        EditNumber: TEdit;
+        StringGridAccount: TStringGrid;
+        ButtonExecute: TButton;
+    LabelWarningIndex: TLabel;
+
+    Procedure FormShow(Sender: TObject);
+    Procedure ButtonExecuteClick(Sender: TObject);
+    Procedure StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    Procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    Procedure StringGridAccountSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+    procedure EditIndexKeyPress(Sender: TObject; var Key: Char);
+    procedure EditIndexChange(Sender: TObject);
+
+    Private
+        Procedure DeleteAccountElement();
+        Procedure DeleteAccountStringGrid();
+    Public
+        { Public declarations }
+    End;
+
+Var
+  FormDeleteAccount: TFormDeleteAccount;
+
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, Account;
+
+
+
+Procedure TFormDeleteAccount.FormShow(Sender: TObject);
+Begin
+    EditNumber.Clear;
+    EditIndex.Clear;
+    SetStartCreateOrDeleteAccount(StringGridAccount);
+    FillCreateOrDeleteAccount(StringGridAccount);
+//    StringGridAccount.RowCount := 3;
+//    StringGridAccount.Cells[0,1] := '1';
+//    StringGridAccount.Cells[0,2] := '3';
+//    StringGridAccount.Cells[1,1] := 'a';
+//    StringGridAccount.Cells[1,2] := 'c';
+End;
+
+
+Procedure TFormDeleteAccount.DeleteAccountElement();
+Var
+    CurrentPointer: PAccount;
+    I: Integer;
+Begin
+    PointerAccount := HeadAccount;
+    While PointerAccount^.Next^.Number <> FindLineStringGrid(StringGridAccount, EditIndex, 1) do
+        PointerAccount := PointerAccount^.Next;
+
+    CurrentPointer := PointerAccount^.Next;
+    PointerAccount^.Next := CurrentPointer^.Next;
+    CurrentPointer^.Next := nil;
+    Dispose(CurrentPointer);
+    If PointerAccount^.Next = nil then
+        TailAccount := PointerAccount;
+    HeadAccount^.ID := HeadAccount^.ID - 1;
+End;
+
+
+Procedure TFormDeleteAccount.DeleteAccountStringGrid();
+Var
+    I, J: Integer;
+Begin
+    For I := FindIndexStringGrid(StringGridAccount, EditIndex, 0) to StringGridAccount.RowCount - 1 do
+    Begin
+        For J := 0 to 1 do
+            StringGridAccount.Cells[J,I] := StringGridAccount.Cells[J,I + 1];
+    End;
+    StringGridAccount.RowCount := StringGridAccount.RowCount - 1;
+End;
+
+
+Procedure TFormDeleteAccount.ButtonExecuteClick(Sender: TObject);
+Begin
+    DeleteAccountElement();
+    DeleteAccountStringGrid();
+    EditIndex.Clear;
+    EditNumber.Clear;
+End;
+
+
+Procedure TFormDeleteAccount.EditIndexKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := CheckKeyEditIndex(EditIndex.Text, EditIndex.SelStart, EditIndex.Sellength, Key);
+End;
+
+
+Procedure TFormDeleteAccount.EditIndexChange(Sender: TObject);
+Var
+    Line: String;
+Begin
+    Line := FindLineStringGrid(StringGridAccount, EditIndex, 1);
+    If EditIndex.Text = '' then
+    Begin
+        LabelWarningIndex.Visible := False;
+        ButtonExecute.Enabled := False;
+        EditNumber.Text := '';
+    End
+    Else If Line = '' then
+    Begin
+        LabelWarningIndex.Visible := True;
+        ButtonExecute.Enabled := False;
+        EditNumber.Text := '';
+    End
+    Else
+    Begin
+        ButtonExecute.Enabled := True;
+        LabelWarningIndex.Visible := False;
+        EditNumber.Text := Line;
+    End;
+End;
+
+
+Procedure TFormDeleteAccount.StringGridAccountSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+Begin
+    If ARow <> 0 then
+    Begin
+        EditIndex.Text := StringGridAccount.Cells[0, ARow];
+        EditNumber.Text := StringGridAccount.Cells[1, ARow];
+    End;
+End;
+
+
+Procedure TFormDeleteAccount.StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    //FillColorInGrid(StringGridAccount, ACol, ARow, Rect, State);
+End;
+
+
+Procedure TFormDeleteAccount.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    EditNumber.Clear;
+    EditIndex.Clear;
+    FillAccount(FormAccount.StringGridAccount);
+End;
+
+End.

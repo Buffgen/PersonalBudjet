@@ -1,0 +1,126 @@
+Unit ChoiceAccount;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids;
+
+Type
+    TFormChoiceAccount = class(TForm)
+        LabelIndex: TLabel;
+        LabelNumber: TLabel;
+        LabelWarningIndex: TLabel;
+        EditIndex: TEdit;
+        EditNumber: TEdit;
+        StringGridAccount: TStringGrid;
+        ButtonExecute: TButton;
+    procedure FormShow(Sender: TObject);
+    procedure ButtonExecuteClick(Sender: TObject);
+    procedure EditIndexKeyPress(Sender: TObject; var Key: Char);
+    procedure EditIndexChange(Sender: TObject);
+    procedure StringGridAccountSelectCell(Sender: TObject; ACol, ARow: Integer;
+      var CanSelect: Boolean);
+    procedure StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormChoiceAccount: TFormChoiceAccount;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, ExpenseJournal, IncomeJournal, Journal;
+
+
+
+Procedure TFormChoiceAccount.FormShow(Sender: TObject);
+Begin
+    EditNumber.Clear;
+    EditIndex.Clear;
+    SetStartCreateOrDeleteAccount(StringGridAccount);
+    FillCreateOrDeleteAccount(StringGridAccount);
+End;
+
+
+Procedure TFormChoiceAccount.ButtonExecuteClick(Sender: TObject);
+Begin
+    Close();
+End;
+
+
+Procedure TFormChoiceAccount.EditIndexKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := CheckKeyEditIndex(EditIndex.Text, EditIndex.SelStart, EditIndex.Sellength, Key);
+End;
+
+
+Procedure TFormChoiceAccount.EditIndexChange(Sender: TObject);
+Var
+    Line: String;
+Begin
+    Line := FindLineStringGrid(StringGridAccount, EditIndex, 1);
+    If EditIndex.Text = '' then
+    Begin
+        LabelWarningIndex.Visible := False;
+        ButtonExecute.Enabled := False;
+        EditNumber.Text := '';
+    End
+    Else If Line = '' then
+    Begin
+        LabelWarningIndex.Visible := True;
+        ButtonExecute.Enabled := False;
+        EditNumber.Text := '';
+    End
+    Else
+    Begin
+        ButtonExecute.Enabled := True;
+        LabelWarningIndex.Visible := False;
+        EditNumber.Text := Line;
+    End;
+End;
+
+
+Procedure TFormChoiceAccount.StringGridAccountSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+Begin
+    If ARow <> 0 then
+    Begin
+        EditIndex.Text := StringGridAccount.Cells[0, ARow];
+        EditNumber.Text := StringGridAccount.Cells[1, ARow];
+    End;
+End;
+
+
+Procedure TFormChoiceAccount.StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    FillColorInGrid(StringGridAccount, ACol, ARow, Rect, State);
+End;
+
+
+Procedure TFormChoiceAccount.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    If (EditNumber.Text = '') then
+        FormExpenseJournal.ComboBoxAccount.ItemIndex := -1
+    Else If IncomeOrExpense then
+    Begin
+        FormIncomeJournal.ComboBoxAccount.Items.Insert(5, EditNumber.Text);
+        TempComboAccount := EditNumber.Text;
+        FormIncomeJournal.ComboBoxAccount.ItemIndex := 5;
+    End
+    Else
+    Begin
+        FormExpenseJournal.ComboBoxAccount.Items.Insert(5, EditNumber.Text);
+        TempComboAccount := EditNumber.Text;
+        FormExpenseJournal.ComboBoxAccount.ItemIndex := 5;
+    End
+End;
+
+End.

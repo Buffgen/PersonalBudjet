@@ -1,0 +1,106 @@
+Unit Account;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Grids, CreateAccount, DeleteAccount;
+
+Type
+    TFormAccount = class(TForm)
+        StringGridAccount: TStringGrid;
+        ButtonCreate: TButton;
+    ButtonDelete: TButton;
+    Button1: TButton;
+
+    Procedure FormShow(Sender: TObject);
+    Procedure ButtonCreateClick(Sender: TObject);
+    Procedure ButtonDeleteClick(Sender: TObject);
+    Procedure StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure ButtonClick(Sender: TObject);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormAccount: TFormAccount;
+
+Implementation
+    {$R *.dfm}
+    
+Uses
+    Main, UnitProcedure;
+
+
+Procedure TFormAccount.FormShow(Sender: TObject);
+Begin
+    SetStartAccount(StringGridAccount);
+    FillAccount(StringGridAccount);
+End;
+
+
+Procedure DeleteAccountElement(Var StringGridAccount: TStringGrid);
+Var
+    CurrentPointer: PAccount;
+    I: Integer;
+Begin
+    DataHasChanged := True;
+    PointerAccount := HeadAccount;
+    While PointerAccount^.Next^.ID <> StrToInt(StringGridAccount.Cells[0, StringGridAccount.Row]) do
+        PointerAccount := PointerAccount^.Next;
+
+    CurrentPointer := PointerAccount^.Next;
+    PointerAccount^.Next := CurrentPointer^.Next;
+    CurrentPointer^.Next := nil;
+    Dispose(CurrentPointer);
+    If PointerAccount^.Next = nil then
+        TailAccount := PointerAccount;
+    HeadAccount^.ID := HeadAccount^.ID - 1;
+End;
+
+
+Procedure DeleteAccountStringGrid(Var StringGridAccount: TStringGrid);
+Var
+    I, J: Integer;
+Begin
+    For I := StringGridAccount.Row to StringGridAccount.RowCount - 1 do
+    Begin
+        For J := 0 to 2 do
+            StringGridAccount.Cells[J,I] := StringGridAccount.Cells[J,I + 1];
+    End;
+    StringGridAccount.RowCount := StringGridAccount.RowCount - 1;
+End;
+
+
+procedure TFormAccount.ButtonClick(Sender: TObject);
+begin
+    If StringGridAccount.Row <> 0 then
+    Begin
+        DeleteAccountElement(StringGridAccount);
+        DeleteAccountStringGrid(StringGridAccount);
+    End;
+end;
+
+Procedure TFormAccount.ButtonCreateClick(Sender: TObject);
+Begin
+    FormCreateAccount.Show;
+End;
+
+
+Procedure TFormAccount.ButtonDeleteClick(Sender: TObject);
+Begin
+    FormDeleteAccount.Show;
+End;
+
+
+Procedure TFormAccount.StringGridAccountDrawCell(Sender: TObject; ACol,ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    FillColorInGrid(StringGridAccount, ACol, ARow, Rect, State);
+    FillColorChoiceRecord(StringGridAccount, ACol, ARow, Rect, State);
+End;
+
+
+End.

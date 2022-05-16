@@ -1,0 +1,93 @@
+Unit Journal;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids, CreateRecordJournal,
+    Vcl.CheckLst, FilterJournal, System.Actions, Vcl.ActnList, Main;
+
+Type
+    TFormJournal = class(TForm)
+    StringGridTemp: TStringGrid;
+    ButtonFilter: TButton;
+    ButtonGraphic: TButton;
+    StringGridChartAcoountsTemp: TStringGrid;
+    procedure ButtonFilterClick(Sender: TObject);
+    procedure ButtonGraphicClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormJournal: TFormJournal;
+    IncomeOrExpense: Boolean;
+    TempComboAccount, TempComboCategory: String;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    UnitProcedure, UnitFilterProcedure;
+
+
+
+procedure TFormJournal.FormShow(Sender: TObject);
+begin
+
+    StringGridChartAcoountsTemp.ColWidths[0] := 150;
+    StringGridChartAcoountsTemp.ColWidths[1] := 150;
+    StringGridChartAcoountsTemp.ColWidths[2] := 150;
+
+end;
+
+
+Procedure TFormJournal.ButtonGraphicClick(Sender: TObject);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+//    StringMatrix := ActionMonthsInYear(StringGridTemp, 'BELVEB', '2022');
+     StringMatrix := ActionOneMonthInYear(StringGridTemp, 'BELVEB', '2022', '02');
+//    StringMatrix := ActionLastOperation(StringGridTemp, 'b');
+//    StringMatrix := ActionCategoryOfAccount(StringGridTemp, 'BELVEB', '2022', '1', True, True);
+//    StringMatrix := ActionCategoryOfAccount(StringGridTemp, 'a', '2022', '04', True ,False);
+
+
+    With FormJournal.StringGridChartAcoountsTemp do
+    Begin
+        RowCount := Length(StringMatrix);
+        For I := 0 to 5 do
+            Cols[I].Clear;
+
+        For I := 0 to High(StringMatrix) do
+            For J := 0 to High(StringMatrix[0]) do
+                Cells[J, I] := StringMatrix[I, J];
+    End;
+
+End;
+
+
+Procedure DeleteJournalStringGrid(Var StringGridJournal: TStringGrid);
+Var
+    I, J: Integer;
+Begin
+    For I := StringGridJournal.Row to StringGridJournal.RowCount - 1 do
+    Begin
+        For J := 0 to 5 do
+            StringGridJournal.Cells[J,I] := StringGridJournal.Cells[J,I + 1];
+    End;
+    StringGridJournal.RowCount := StringGridJournal.RowCount - 1;
+End;
+
+
+Procedure TFormJournal.ButtonFilterClick(Sender: TObject);
+Begin
+    FormFilterJournal.Show;
+End;
+
+End.

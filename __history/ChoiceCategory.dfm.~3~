@@ -1,0 +1,46 @@
+object FormChoiceCategory: TFormChoiceCategory
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = #1042#1099#1073#1088#1072#1090#1100' '#1082#1072#1090#1077#1075#1086#1088#1080#1102
+  ClientHeight = 404
+  ClientWidth = 358
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  OnClose = FormClose
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object StringGridCategory: TStringGrid
+    Left = 56
+    Top = 24
+    Width = 250
+    Height = 217
+    ColCount = 2
+    DefaultColWidth = 144
+    FixedCols = 0
+    RowCount = 1
+    FixedRows = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect, goFixedRowDefAlign]
+    TabOrder = 0
+    OnDrawCell = StringGridCategoryDrawCell
+    RowHeights = (
+      24)
+  end
+  object ButtonExecute: TButton
+    Left = 117
+    Top = 289
+    Width = 116
+    Height = 31
+    Caption = #1042#1099#1073#1088#1072#1090#1100' '#1082#1072#1090#1077#1075#1086#1088#1080#1102
+    TabOrder = 1
+    OnClick = ButtonExecuteClick
+  end
+end

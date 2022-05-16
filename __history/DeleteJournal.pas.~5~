@@ -1,0 +1,116 @@
+Unit DeleteJournal;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls;
+
+Type
+    TFormDeleteJournal = class(TForm)
+        StringGridJournal: TStringGrid;
+    ButtonExecute: TButton;
+    procedure FormShow(Sender: TObject);
+    procedure StringGridJournalDrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+
+    Private
+        Procedure DeleteJournalStringGrid();
+        Procedure DeleteJournalElement(StringGridJournalRow: Integer);
+
+    Public
+        { Public declarations }
+    End;
+
+
+Var
+  FormDeleteJournal: TFormDeleteJournal;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, Journal, UnitProcedure;
+
+
+
+
+Procedure TFormDeleteJournal.DeleteJournalStringGrid();
+Var
+    I, J: Integer;
+Begin
+    For I := StringGridJournal.Row to StringGridJournal.RowCount - 1 do
+    Begin
+        For J := 0 to 4 do
+            StringGridJournal.Cells[J,I] := StringGridJournal.Cells[J,I + 1];
+    End;
+    StringGridJournal.RowCount := StringGridJournal.RowCount - 1;
+End;
+
+
+Procedure TFormDeleteJournal.DeleteJournalElement(StringGridJournalRow: Integer);
+Var
+    CurrentPointer: PJournal;
+    I: Integer;
+Begin
+    DataHasChanged := True;
+    PointerJournal := HeadJournal;
+
+    For I := 1 to StringGridJournalRow do
+        PointerJournal := PointerJournal^.Next;
+
+    CurrentPointer := PointerJournal^.Next;
+    PointerJournal^.Next := CurrentPointer^.Next;
+    CurrentPointer^.Next := nil;
+    Dispose(CurrentPointer);
+    If PointerJournal^.Next = nil then
+        TailJournal := PointerJournal;
+    HeadJournal^.ID := HeadJournal^.ID - 1;
+End;
+
+
+//procedure TFormDeleteJournal.ButtonExecuteClick(Sender: TObject);
+//begin
+//    If StringGridJournal.Row <> 0 then
+//    Begin
+//        DeleteJournalStringGrid();
+//        DeleteJournalElement();
+//    End;
+//end;
+
+
+procedure TFormDeleteJournal.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+    FillJournal(FormMain.StringGridJournal);
+end;
+
+Procedure TFormDeleteJournal.FormShow(Sender: TObject);
+Begin
+  //   SetStartJournal(StringGridJournal);
+  //   FillJournal(StringGridJournal);
+
+    If FormMain.StringGridJournal.Row <> 0 then
+    Begin
+        If MessageBox(Application.Handle,'Вы действительно хотите удалить данную операцию?','Внимание',MB_YESNO+MB_ICONWARNING) = IDYES then
+        Begin
+            DeleteJournalElement(FormMain.StringGridJournal.Row);
+ //           DeleteJournalStringGrid(StringGridJournal);
+        End;
+    End;
+End;
+
+
+
+procedure TFormDeleteJournal.StringGridJournalDrawCell(Sender: TObject; ACol,
+  ARow: Integer; Rect: TRect; State: TGridDrawState);
+  Var
+    CellText: String;
+    SavedAlign: Word;
+begin
+    FillColorInGrid(StringGridJournal, ACol, ARow, Rect, State);
+    FillColorChoiceRecord(StringGridJournal, ACol, ARow, Rect, State);
+end;
+
+End.

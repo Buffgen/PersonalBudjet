@@ -1,0 +1,55 @@
+unit EditCategory;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Buttons;
+
+type
+  TFormEditCategory = class(TForm)
+    PanelEditCategory: TPanel;
+    EditCategoryOldName: TEdit;
+    EditCategoryNewName: TEdit;
+    LabelOldName: TLabel;
+    LabelNewName: TLabel;
+    ButtonAdd: TSpeedButton;
+    ButtonExit: TSpeedButton;
+    EditCategoryID: TEdit;
+    LabelNewNameWarning: TLabel;
+    procedure ButtonAddClick(Sender: TObject);
+    procedure EditCategoryNewNameChange(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FormEditCategory: TFormEditCategory;
+
+implementation
+
+{$R *.dfm}
+
+uses Category;
+
+
+
+Procedure TFormEditCategory.ButtonAddClick(Sender: TObject);
+Begin
+    {
+     If Not ChangeCategoryName(EditCategoryID.Text, EditCategoryOldName.Text, EditCategoryNewName.Text) then
+        LabelWarning.Visible := True;
+
+        EditCategoryNewName.Text.Clear;
+    }
+End;
+
+Procedure TFormEditCategory.EditCategoryNewNameChange(Sender: TObject);
+Begin
+    LabelNewNameWarning.Visible := True;
+End;
+
+end.

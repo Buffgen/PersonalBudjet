@@ -1,0 +1,164 @@
+object FormAccount: TFormAccount
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = #1057#1095#1077#1090#1072
+  ClientHeight = 364
+  ClientWidth = 667
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  PixelsPerInch = 96
+  TextHeight = 13
+  object LabelWarning: TLabel
+    Left = 152
+    Top = 304
+    Width = 272
+    Height = 19
+    Caption = #1047#1072#1087#1086#1083#1085#1080#1090#1077' 1-3 '#1103#1095#1077#1081#1082#1080' '#1076#1072#1085#1085#1099#1084#1080'!'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clRed
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    Visible = False
+  end
+  object LabelActionAccount: TLabel
+    Left = 29
+    Top = 255
+    Width = 127
+    Height = 16
+    Caption = #1048#1079#1084#1077#1085#1077#1085#1080#1077' '#1089#1095#1077#1090#1086#1074':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelIndex: TLabel
+    Left = 174
+    Top = 255
+    Width = 21
+    Height = 16
+    Caption = #8470':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelAccount: TLabel
+    Left = 244
+    Top = 255
+    Width = 36
+    Height = 16
+    Caption = #1057#1095#1105#1090':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelBalance: TLabel
+    Left = 430
+    Top = 255
+    Width = 49
+    Height = 16
+    Caption = #1057#1091#1084#1084#1072':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object StringGridAccount: TStringGrid
+    Left = 166
+    Top = 24
+    Width = 483
+    Height = 217
+    ColCount = 3
+    DefaultColWidth = 144
+    FixedCols = 0
+    RowCount = 8
+    TabOrder = 0
+    OnSelectCell = StringGridAccountSelectCell
+    RowHeights = (
+      24
+      24
+      24
+      24
+      24
+      24
+      24
+      24)
+  end
+  object ButtonExecute: TButton
+    Left = 544
+    Top = 312
+    Width = 96
+    Height = 31
+    Caption = #1042#1099#1087#1086#1083#1085#1080#1090#1100
+    Enabled = False
+    TabOrder = 1
+    OnClick = ButtonExecuteClick
+  end
+  object ComboBoxParameters: TComboBox
+    Left = 28
+    Top = 277
+    Width = 128
+    Height = 21
+    TabOrder = 2
+    Text = #1042#1099#1073#1077#1088#1080#1090#1077' '#1076#1077#1081#1089#1090#1074#1080#1077
+    OnChange = ComboBoxParametersChange
+    OnClick = ComboBoxParametersClick
+    OnKeyPress = ComboBoxParametersKeyPress
+    Items.Strings = (
+      #1055#1086#1087#1086#1083#1085#1080#1090#1100' '#1089#1095#1105#1090
+      #1057#1086#1079#1076#1072#1090#1100' '#1089#1095#1105#1090
+      #1059#1076#1072#1083#1080#1090#1100' '#1089#1095#1105#1090)
+  end
+  object EditIndex: TEdit
+    Left = 174
+    Top = 277
+    Width = 50
+    Height = 21
+    Enabled = False
+    MaxLength = 15
+    TabOrder = 3
+    Text = #1048#1085#1076#1077#1082#1089
+    OnChange = EditIndexChange
+  end
+  object EditNumber: TEdit
+    Left = 244
+    Top = 277
+    Width = 180
+    Height = 21
+    Enabled = False
+    MaxLength = 20
+    TabOrder = 4
+    Text = #1057#1095#1105#1090
+    OnChange = EditNumberChange
+  end
+  object EditBalance: TEdit
+    Left = 430
+    Top = 277
+    Width = 210
+    Height = 21
+    Enabled = False
+    MaxLength = 7
+    TabOrder = 5
+    Text = #1057#1091#1084#1084#1072
+    OnChange = EditBalanceChange
+  end
+end

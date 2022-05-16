@@ -1,0 +1,41 @@
+program CourseWork;
+
+uses
+  Vcl.Forms,
+  Main in 'Main.pas' {FormMain},
+  Account in 'Account.pas' {FormAccount},
+  Category in 'Category.pas' {FormCategory},
+  Journal in 'Journal.pas' {FormJournal},
+  UnitProcedure in 'UnitProcedure.pas',
+  CreateAccount in 'CreateAccount.pas' {FormCreateAccount},
+  DeleteAccount in 'DeleteAccount.pas' {FormDeleteAccount},
+  CreateCategory in 'CreateCategory.pas' {FormCreateCategory},
+  CreateRecordJournal in 'CreateRecordJournal.pas' {FormCreateRecordJournal},
+  ChoiceAccount in 'ChoiceAccount.pas' {FormChoiceAccount},
+  ChoiceCategory in 'ChoiceCategory.pas' {FormChoiceCategory},
+  DeleteJournal in 'DeleteJournal.pas' {FormDeleteJournal},
+  FilterJournal in 'FilterJournal.pas' {FormFilterJournal},
+  UnitFilterProcedure in 'UnitFilterProcedure.pas',
+  Vcl.Themes,
+  Vcl.Styles;
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  TStyleManager.TrySetStyle('Sky');
+  Application.CreateForm(TFormMain, FormMain);
+  Application.CreateForm(TFormAccount, FormAccount);
+  Application.CreateForm(TFormCategory, FormCategory);
+  Application.CreateForm(TFormJournal, FormJournal);
+  Application.CreateForm(TFormCreateAccount, FormCreateAccount);
+  Application.CreateForm(TFormDeleteAccount, FormDeleteAccount);
+  Application.CreateForm(TFormCreateCategory, FormCreateCategory);
+  Application.CreateForm(TFormCreateRecordJournal, FormCreateRecordJournal);
+  Application.CreateForm(TFormChoiceAccount, FormChoiceAccount);
+  Application.CreateForm(TFormChoiceCategory, FormChoiceCategory);
+  Application.CreateForm(TFormDeleteJournal, FormDeleteJournal);
+  Application.CreateForm(TFormFilterJournal, FormFilterJournal);
+  Application.Run;
+end.

@@ -1,0 +1,112 @@
+object FormChoiceAccount: TFormChoiceAccount
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = #1042#1099#1073#1088#1072#1090#1100' '#1089#1095#1105#1090
+  ClientHeight = 378
+  ClientWidth = 517
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  OnClose = FormClose
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object LabelIndex: TLabel
+    Left = 78
+    Top = 255
+    Width = 21
+    Height = 16
+    Caption = #8470':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelNumber: TLabel
+    Left = 148
+    Top = 255
+    Width = 36
+    Height = 16
+    Caption = #1057#1095#1105#1090':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelWarningIndex: TLabel
+    Left = 48
+    Top = 304
+    Width = 324
+    Height = 19
+    Caption = #1059#1082#1072#1078#1080#1090#1077' '#1089#1091#1097#1077#1089#1090#1074#1091#1102#1097#1080#1081' '#1085#1086#1084#1077#1088' '#1089#1095#1105#1090#1072'!'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clRed
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    Visible = False
+  end
+  object EditIndex: TEdit
+    Left = 78
+    Top = 277
+    Width = 50
+    Height = 21
+    MaxLength = 5
+    TabOrder = 0
+    OnChange = EditIndexChange
+    OnKeyPress = EditIndexKeyPress
+  end
+  object EditNumber: TEdit
+    Left = 148
+    Top = 277
+    Width = 180
+    Height = 21
+    Enabled = False
+    MaxLength = 20
+    TabOrder = 1
+  end
+  object StringGridAccount: TStringGrid
+    Left = 78
+    Top = 24
+    Width = 250
+    Height = 217
+    ColCount = 3
+    DefaultColWidth = 144
+    FixedCols = 0
+    RowCount = 8
+    FixedRows = 0
+    TabOrder = 2
+    OnDrawCell = StringGridAccountDrawCell
+    OnSelectCell = StringGridAccountSelectCell
+    RowHeights = (
+      24
+      24
+      24
+      24
+      24
+      24
+      24
+      24)
+  end
+  object ButtonExecute: TButton
+    Left = 400
+    Top = 275
+    Width = 83
+    Height = 32
+    Caption = #1042#1099#1073#1088#1072#1090#1100' '#1089#1095#1105#1090
+    TabOrder = 3
+    OnClick = ButtonExecuteClick
+  end
+end

@@ -1,0 +1,132 @@
+Unit CreateCategory;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids;
+
+Type
+    TFormCreateCategory = class(TForm)
+        LabelName: TLabel;
+        StringGridCategory: TStringGrid;
+        ButtonExecute: TButton;
+        EditName: TEdit;
+    LabelWarningName: TLabel;
+    procedure FormShow(Sender: TObject);
+    procedure ButtonExecuteClick(Sender: TObject);
+    procedure EditNameChange(Sender: TObject);
+    procedure StringGridCategoryDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    Private
+        Procedure AddNewCategoryElement();
+        Procedure AddNewAccountStringGrid();
+
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormCreateCategory: TFormCreateCategory;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, Category, UnitProcedure;
+
+
+
+Procedure TFormCreateCategory.FormShow(Sender: TObject);
+Begin
+    EditName.Clear;
+    SetStartCategory(StringGridCategory);
+    FillCategory(StringGridCategory);
+End;
+
+
+Procedure TFormCreateCategory.AddNewCategoryElement();
+Begin
+    DataHasChanged := True;
+    Inc(MaxCategoryID);
+    PointerCategory := TailCategory;
+    New(PointerCategory^.Next);
+    PointerCategory := PointerCategory^.Next;
+    PointerCategory^.Next := Nil;
+    PointerCategory^.ID := MaxCategoryID;
+    PointerCategory^.Name := EditName.Text;
+    TailCategory := PointerCategory;
+    HeadCategory^.ID := HeadCategory^.ID + 1;
+End;
+
+
+Procedure TFormCreateCategory.AddNewAccountStringGrid();
+Begin
+    StringGridCategory.RowCount := StringGridCategory.RowCount + 1;
+    StringGridCategory.Cells[0 ,StringGridCategory.RowCount - 1] := IntToStr(TailCategory^.ID);
+    StringGridCategory.Cells[1 ,StringGridCategory.RowCount - 1] := TailCategory^.Name;
+End;
+
+
+Procedure TFormCreateCategory.ButtonExecuteClick(Sender: TObject);
+Begin
+    AddNewCategoryElement();
+    AddNewAccountStringGrid();
+    EditName.Clear;
+End;
+
+
+Function FindLineInCategoryList(InputLine: String): Boolean;
+Var
+    IsIncorrect: Boolean;
+    I: Integer;
+Begin
+    IsIncorrect := False;
+    PointerCategory := HeadCategory^.Next^.Next^.Next;
+
+    I := 1;
+    While (PointerCategory <> nil) and (Not IsIncorrect) do
+    Begin
+        If InputLine = PointerCategory^.Name then
+            IsIncorrect := True
+        Else
+            PointerCategory := PointerCategory^.Next;
+    End;
+
+    FindLineInCategoryList := IsIncorrect;
+End;
+
+
+Procedure TFormCreateCategory.EditNameChange(Sender: TObject);
+Begin
+    If EditName.Text = '' then
+    Begin
+        ButtonExecute.Enabled := False;
+        LabelWarningName.Visible := False;
+    End
+    Else If FindLineInCategoryList(EditName.Text) then
+    Begin
+        ButtonExecute.Enabled := False;
+        LabelWarningName.Visible := True;
+    End
+    Else
+    Begin
+        ButtonExecute.Enabled := True;
+        LabelWarningName.Visible := False;
+    End;
+End;
+
+
+Procedure TFormCreateCategory.StringGridCategoryDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    FillColorInGrid(StringGridCategory, ACol, ARow, Rect, State);
+End;
+
+
+Procedure TFormCreateCategory.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    EditName.Clear;
+    FillCategory(FormCategory.StringGridCategory);
+End;
+
+End.

@@ -1,0 +1,106 @@
+Unit ChoiceCategory;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids;
+
+Type
+    TFormChoiceCategory = class(TForm)
+        LabelName: TLabel;
+        LabelWarningIndex: TLabel;
+        StringGridCategory: TStringGrid;
+        ButtonExecute: TButton;
+        EditName: TEdit;
+    procedure FormShow(Sender: TObject);
+    procedure StringGridCategoryDrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
+    procedure StringGridCategorySelectCell(Sender: TObject; ACol, ARow: Integer;
+      var CanSelect: Boolean);
+    procedure EditNameChange(Sender: TObject);
+    procedure ButtonExecuteClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormChoiceCategory: TFormChoiceCategory;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, ExpenseJournal, IncomeJournal, Journal;
+
+
+
+Procedure TFormChoiceCategory.FormShow(Sender: TObject);
+Begin
+    EditName.Clear;
+    SetStartCategory(StringGridCategory);
+    FillCategory(StringGridCategory);
+End;
+
+
+Procedure TFormChoiceCategory.ButtonExecuteClick(Sender: TObject);
+Begin
+    Close();
+End;
+
+
+Procedure TFormChoiceCategory.EditNameChange(Sender: TObject);
+Var
+    Line: String;
+Begin
+    Line := FindLineStringGrid(StringGridCategory, EditName, 0);
+    If EditName.Text = '' then
+    Begin
+        LabelWarningIndex.Visible := False;
+        ButtonExecute.Enabled := False;
+    End
+    Else If Line = '' then
+    Begin
+        LabelWarningIndex.Visible := True;
+        ButtonExecute.Enabled := False;
+        EditName.Text := '';
+    End
+    Else
+    Begin
+        ButtonExecute.Enabled := True;
+        LabelWarningIndex.Visible := False;
+        EditName.Text := Line;
+    End;
+End;
+
+
+Procedure TFormChoiceCategory.StringGridCategorySelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+Begin
+    If ARow <> 0 then
+        EditName.Text := StringGridCategory.Cells[0, ARow];
+End;
+
+
+Procedure TFormChoiceCategory.StringGridCategoryDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    FillColorInGrid(StringGridCategory, ACol, ARow, Rect, State);
+End;
+
+
+Procedure TFormChoiceCategory.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    If EditName.Text <> '' then
+    Begin
+        FormExpenseJournal.ComboBoxCategory.Items.Insert(5, EditName.Text);
+        TempComboCategory := EditName.Text;
+        FormExpenseJournal.ComboBoxCategory.ItemIndex := 5;
+    End
+    Else
+        FormExpenseJournal.ComboBoxCategory.ItemIndex := -1;
+End;
+
+End.

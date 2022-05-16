@@ -1,0 +1,125 @@
+Unit Category;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+    Vcl.StdCtrls, Vcl.Grids, Vcl.ExtCtrls, Vcl.Buttons, CreateCategory,
+    EditCategory;
+
+Type
+    TFormCategory = class(TForm)
+    StringGridCategory: TStringGrid;
+    PanelCategoriesToolbar: TPanel;
+    PanelCatogoriesGrid: TPanel;
+    ButtonCreate: TSpeedButton;
+    ButtonDelete: TSpeedButton;
+    ButtonEdit: TSpeedButton;
+    ButtonExit: TSpeedButton;
+    Procedure FormShow(Sender: TObject);
+    Procedure ButtonCreateClick(Sender: TObject);
+    Procedure ButtonDeleteClick(Sender: TObject);
+    Procedure ButtonExitClick(Sender: TObject);
+    Procedure ButtonEditClick(Sender: TObject);
+
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormCategory: TFormCategory;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure;
+
+
+
+Procedure TFormCategory.FormShow(Sender: TObject);
+Begin
+    SetStartCategory(StringGridCategory);
+    FillCategory(StringGridCategory);
+
+    If StringGridCategory.RowCount > 1 then
+       StringGridCategory.Row := 1;
+End;
+
+
+Procedure DeleteCategoryElement(Var StringGridCategory: TStringGrid);
+Var
+    CurrentPointer: PMainCategory;
+    I: Integer;
+Begin
+    DataHasChanged := True;
+    PointerCategory := HeadCategory^.Next^.Next;
+    While PointerCategory^.Next^.ID <> StrToInt(StringGridCategory.Cells[0, StringGridCategory.Row]) do
+        PointerCategory := PointerCategory^.Next;
+
+    DeleteCurrentOneCategoryElement(PointerCategory);
+    HeadCategory^.ID := HeadCategory^.ID - 1;
+End;
+
+
+Procedure DeleteCategoryStringGrid(Var StringGridCategory: TStringGrid);
+Var
+    I, J: Integer;
+Begin
+    For I := StringGridCategory.Row to StringGridCategory.RowCount - 1 do
+    Begin
+        For J := 0 to 1 do
+            StringGridCategory.Cells[J,I] := StringGridCategory.Cells[J,I + 1];
+    End;
+    StringGridCategory.RowCount := StringGridCategory.RowCount - 1;
+End;
+
+
+Procedure TFormCategory.ButtonCreateClick(Sender: TObject);
+Begin
+    FormCreateCategory.Show;
+End;
+
+
+Procedure TFormCategory.ButtonDeleteClick(Sender: TObject);
+Begin
+    If StringGridCategory.Row <> 0 then
+    Begin
+        If MessageBox(Application.Handle,'Вы действительно хотите удалить данную категорию?','Внимание',MB_YESNO+MB_ICONWARNING) = IDYES then
+        Begin
+            ChangeCategoryOfListJournal(StringGridCategory.Cells[1, StringGridCategory.Row], HeadCategory^.Next^.Next^.Name);
+            ChangeCategoryStringGridJournal(FormMain.StringGridJournal, StringGridCategory.Cells[1, StringGridCategory.Row], HeadCategory^.Next^.Next^.Name);
+            If FormMain.StringGridLastAccountAction.Cells[2, 1] = StringGridCategory.Cells[1, StringGridCategory.Row] then
+                FormMain.StringGridLastAccountAction.Cells[2, 1] := HeadCategory^.Next^.Next^.Name;
+            DeleteCategoryElement(StringGridCategory);
+            DeleteCategoryStringGrid(StringGridCategory);
+            ResetTabReportsObjects();
+        End;
+    End;
+End;
+
+
+Procedure TFormCategory.ButtonEditClick(Sender: TObject);
+Begin
+    If StringGridCategory.Row <> 0 then
+    Begin
+        FormEditCategory.EditCategoryOldName.Text := StringGridCategory.Cells[1,StringGridCategory.Row];
+        FormEditCategory.EditCategoryID.Text := StringGridCategory.Cells[0,StringGridCategory.Row];
+        FormEditCategory.Show;
+    End;
+End;
+
+
+
+
+Procedure TFormCategory.ButtonExitClick(Sender: TObject);
+Begin
+    Close();
+End;
+
+
+End.

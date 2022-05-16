@@ -1,0 +1,63 @@
+Unit About;
+
+Interface
+
+Uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Vcl.Imaging.pngimage, ShellApi;
+
+Type
+  TFormAbout = Class(TForm)
+    PanelAbout: TPanel;
+    ImageApplicationIcon: TImage;
+    LabelApplicationName: TLabel;
+    MemoAsIs: TMemo;
+    LabelVersion: TLabel;
+    LabelCopyright: TLabel;
+    LabelRADUrl: TLabel;
+    LabelLicenses: TLabel;
+    LabelRAD: TLabel;
+    LabelIcons: TLabel;
+    LabelIconUrl: TLabel;
+    Procedure LabelRADUrlClick(Sender: TObject);
+    Procedure LabelIconUrlClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  Private
+    { Private declarations }
+  Public
+    { Public declarations }
+  End;
+
+Var
+  FormAbout: TFormAbout;
+
+Implementation
+
+{$R *.dfm}
+
+Procedure TFormAbout.FormShow(Sender: TObject);
+Begin
+    LabelIconUrl.StyleElements := LabelIconUrl.StyleElements - [seFont];
+    LabelIconUrl.Font.Color := clBlue;
+    LabelRADUrl.StyleElements := LabelRADUrl.StyleElements - [seFont];
+    LabelRADUrl.Font.Color := clBlue;
+End;
+
+Procedure TFormAbout.LabelIconUrlClick(Sender: TObject);
+Var
+  ExtLink: String;
+Begin
+  ExtLink := 'https://www.flaticon.com/';
+  ShellExecute(Application.Handle, PChar('open'), PChar(ExtLink), nil, nil, SW_SHOW);
+End;
+
+Procedure TFormAbout.LabelRADUrlClick(Sender: TObject);
+Var
+  ExtLink: String;
+Begin
+  ExtLink := 'https://www.embarcadero.com/';
+  ShellExecute(Application.Handle, PChar('open'), PChar(ExtLink), nil, nil, SW_SHOW);
+End;
+
+End.

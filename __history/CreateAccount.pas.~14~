@@ -1,0 +1,113 @@
+Unit CreateAccount;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids, Vcl.ExtCtrls,
+  Vcl.Buttons;
+
+Type
+    TFormCreateAccount = class(TForm)
+    LabelAccountName: TLabel;
+    EditAccountName: TEdit;
+    LabelWarningName: TLabel;
+    PanelCreateAccount: TPanel;
+    ButtonAdd: TSpeedButton;
+    ButtonExit: TSpeedButton;
+
+
+    Procedure ButtonAddClick(Sender: TObject);
+    Procedure FormShow(Sender: TObject);
+    Procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    Procedure EditAccountNameChange(Sender: TObject);
+    Procedure ButtonExitClick(Sender: TObject);
+
+
+    Private
+        Procedure AddNewAccountElement();
+
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormCreateAccount: TFormCreateAccount;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, Account;
+
+
+
+Procedure TFormCreateAccount.FormShow(Sender: TObject);
+Begin
+    LabelAccountName.StyleElements := LabelAccountName.StyleElements - [seFont];
+    LabelAccountName.Font.Color := clTeal;
+    LabelWarningName.StyleElements := LabelWarningName.StyleElements - [seFont];
+    LabelWarningName.Font.Color := clRed;
+    EditAccountName.Clear;
+    ButtonAdd.Enabled := False;
+
+End;
+
+
+Procedure TFormCreateAccount.AddNewAccountElement();
+Begin
+    DataHasChanged := True;
+    Inc(MaxAccountID);
+    PointerAccount := TailAccount;
+    New(PointerAccount^.Next);
+    PointerAccount := PointerAccount^.Next;
+    PointerAccount^.Next := Nil;
+    PointerAccount^.ID := MaxAccountID;
+    PointerAccount^.Name := AnsiUpperCase(EditAccountName.Text);
+    PointerAccount^.Balance := 0;
+    TailAccount := PointerAccount;
+    HeadAccount^.ID := HeadAccount^.ID + 1;
+End;
+
+
+
+Procedure TFormCreateAccount.ButtonAddClick(Sender: TObject);
+Begin
+    AddNewAccountElement();
+    FillAccount(FormMain.StringGridAccounts);
+    EditAccountName.Clear;
+End;
+
+
+Procedure TFormCreateAccount.ButtonExitClick(Sender: TObject);
+Begin
+    Close();
+End;
+
+
+Procedure TFormCreateAccount.EditAccountNameChange(Sender: TObject);
+Begin
+    If EditAccountName.Text = '' then
+    Begin
+        ButtonAdd.Enabled := False;
+        LabelWarningName.Visible := False;
+    End
+    Else If FindLineInAccountList(EditAccountName.Text, 0, False) then
+    Begin
+        ButtonAdd.Enabled := False;
+        LabelWarningName.Visible := True;
+    End
+    Else
+    Begin
+        ButtonAdd.Enabled := True;
+        LabelWarningName.Visible := False;
+    End;
+End;
+
+
+Procedure TFormCreateAccount.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    EditAccountName.Clear;
+End;
+
+End.

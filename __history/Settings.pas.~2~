@@ -1,0 +1,27 @@
+unit Settings;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls;
+
+type
+  TFormSettings = class(TForm)
+    PanelSettings: TPanel;
+    ComboBoxUIStyle: TComboBox;
+    LabelUIStyle: TLabel;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FormSettings: TFormSettings;
+
+implementation
+
+{$R *.dfm}
+
+end.

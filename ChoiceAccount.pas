@@ -1,0 +1,57 @@
+Unit ChoiceAccount;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids, Vcl.ExtCtrls,
+  Vcl.Buttons;
+
+Type
+    TFormChoiceAccount = class(TForm)
+    StringGridAccountsListShort: TStringGrid;
+    PanelSetAccount: TPanel;
+    ButtonApply: TSpeedButton;
+    Procedure FormShow(Sender: TObject);
+    Procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    Procedure ButtonApplyClick(Sender: TObject);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormChoiceAccount: TFormChoiceAccount;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, CreateRecordJournal, Journal;
+
+
+
+Procedure TFormChoiceAccount.FormShow(Sender: TObject);
+Begin
+    SetStartAccountsListShort(StringGridAccountsListShort);
+    FillAccountsListShort(StringGridAccountsListShort);
+End;
+
+
+Procedure TFormChoiceAccount.ButtonApplyClick(Sender: TObject);
+Begin
+    If StringGridAccountsListShort.Row <> 0 then
+        Close();
+End;
+
+
+
+
+Procedure TFormChoiceAccount.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    PushResultsInComboBox(StringGridAccountsListShort, TempComboAccount, FormCreateRecordJournal.ComboBoxAccount)
+End;
+
+End.

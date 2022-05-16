@@ -1,0 +1,276 @@
+Unit CreateRecordJournal;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+    Vcl.Grids, Vcl.StdCtrls, Vcl.ComCtrls,Vcl.ExtCtrls, Vcl.Buttons,
+    ChoiceAccount, ChoiceCategory;
+
+Type
+    TFormCreateRecordJournal = class(TForm)
+        ComboBoxAccount: TComboBox;
+        EditAmount: TEdit;
+        LabelAccount: TLabel;
+        LabelAmount: TLabel;
+        LabelDate: TLabel;
+        LabelComment: TLabel;
+        EditComment: TEdit;
+        DateTimePickerJournal: TDateTimePicker;
+    ComboBoxAction: TComboBox;
+    Panel_CreateRecordJournal: TPanel;
+    LabelActionType: TLabel;
+    ButtonAdd: TSpeedButton;
+    ButtonExit: TSpeedButton;
+    ComboBoxCategory: TComboBox;
+    LabelCategory: TLabel;
+    Procedure FormShow(Sender: TObject);
+    Procedure EditAmountKeyPress(Sender: TObject; var Key: Char);
+    Procedure ComboBoxAccountDropDown(Sender: TObject);
+    Procedure ComboBoxAccountChange(Sender: TObject);
+    Procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    Procedure ButtonAddClick(Sender: TObject);
+    procedure ButtonExitClick(Sender: TObject);
+    procedure ComboBoxCategoryChange(Sender: TObject);
+    procedure ComboBoxCategoryDropDown(Sender: TObject);
+    procedure ComboBoxActionChange(Sender: TObject);
+    procedure EditAmountChange(Sender: TObject);
+
+
+    Private
+        Procedure AddNewJournalElement();
+        Procedure CheckFieldsNotEmpty;
+      //  Procedure AddNewJournalStringGrid();
+
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormCreateRecordJournal: TFormCreateRecordJournal;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, Journal;
+
+
+
+
+Procedure TFormCreateRecordJournal.FormShow(Sender: TObject);
+Begin
+    LabelActionType.StyleElements := LabelActionType.StyleElements - [seFont];
+    LabelActionType.Font.Color := clTeal;
+    LabelAccount.StyleElements := LabelAccount.StyleElements - [seFont];
+    LabelAccount.Font.Color := clTeal;
+    LabelCategory.StyleElements := LabelCategory.StyleElements - [seFont];
+    LabelCategory.Font.Color := clTeal;
+    LabelAmount.StyleElements := LabelAmount.StyleElements - [seFont];
+    LabelAmount.Font.Color := clTeal;
+    LabelDate.StyleElements := LabelDate.StyleElements - [seFont];
+    LabelDate.Font.Color := clTeal;
+    LabelComment.StyleElements := LabelComment.StyleElements - [seFont];
+    LabelComment.Font.Color := clTeal;
+    ComboBoxAction.ItemIndex := -1;
+    ComboBoxAccount.ItemIndex := -1;
+    ComboBoxAccount.Enabled := False;
+    ComboBoxCategory.ItemIndex := -1;
+    ComboBoxCategory.Enabled := False;
+    EditAmount.Clear;
+    DateTimePickerJournal.Date := Now;
+    EditComment.Clear;
+    ButtonAdd.Enabled := False;
+    TempComboAccount := '';
+End;
+
+
+Procedure TFormCreateRecordJournal.CheckFieldsNotEmpty;
+Begin
+    If (ComboBoxAction.ItemIndex >= 0)
+        and (ComboBoxAccount.ItemIndex >= 0)
+        and (((ComboBoxCategory.Enabled) and (ComboBoxCategory.ItemIndex >=0)) or Not(ComboBoxCategory.Enabled))
+        and (EditAmount.Text <> '')
+    then
+        ButtonAdd.Enabled := True
+    Else
+        ButtonAdd.Enabled := False;
+End;
+
+// проверка заполнения полей для активации кнопки ButtonAdd
+Procedure TFormCreateRecordJournal.EditAmountChange(Sender: TObject);
+Begin
+    CheckFieldsNotEmpty;
+End;
+
+
+Procedure TFormCreateRecordJournal.EditAmountKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := CheckKeyEditMoney(EditAmount.Text, EditAmount.SelStart, EditAmount.SelLength, Key);
+End;
+
+
+Procedure TFormCreateRecordJournal.AddNewJournalElement();
+Begin
+    DataHasChanged := True;
+    Inc(MaxJournalID);
+    PointerJournal := TailJournal;
+    New(PointerJournal^.Next);
+    PointerJournal := PointerJournal^.Next;
+    PointerJournal^.Next := Nil;
+    PointerJournal^.ID := MaxJournalID;
+    PointerJournal^.Account := ComboBoxAccount.Text;
+    Case ComboBoxAction.ItemIndex of
+        0: Begin
+               PointerJournal^.Category := HeadCategory^.Next^.Name;
+               PointerJournal^.Amount := StrToFloat(EditAmount.Text);
+           End;
+        1: Begin
+               PointerJournal^.Category := ComboBoxCategory.Text;
+               PointerJournal^.Amount := StrToFloat(EditAmount.Text) * (-1)
+           End;
+    End;
+    PointerJournal^.Date := DateTimePickerJournal.Date;
+    PointerJournal^.Comment := EditComment.Text;
+    TailJournal := PointerJournal;
+    HeadJournal^.ID := HeadJournal^.ID + 1;
+    FindLineInAccountList(TailJournal^.Account, TailJournal^.Amount, True);
+
+    FillAccount(FormMain.StringGridAccounts);
+    FillChartTabAccounts(FormJournal.StringGridChartAcoountsTemp, FormMain.StringGridAccounts.Cells[AccountsColAccount, FormMain.StringGridAccounts.Row], YearNow);
+
+
+
+End;
+
+
+Procedure TFormCreateRecordJournal.ButtonAddClick(Sender: TObject);
+Begin
+    AddNewJournalElement();
+    ComboBoxAction.ItemIndex := -1;
+    ComboBoxAccount.ItemIndex := -1;
+    ComboBoxCategory.ItemIndex := -1;
+    EditAmount.Clear;
+    EditComment.Clear;
+    ComboBoxAccount.Enabled := False;
+    ComboBoxCategory.Enabled := False;
+
+
+End;
+
+
+Procedure TFormCreateRecordJournal.ComboBoxAccountDropDown(Sender: TObject);
+    Var
+    I: Integer;
+Begin
+    ComboBoxAccount.Items.Clear;
+    PointerAccount := HeadAccount^.Next;
+    I := 0;
+    While (I < 5) and (PointerAccount <> nil) do
+    Begin
+        ComboBoxAccount.Items.Add(PointerAccount^.Name);
+        PointerAccount := PointerAccount^.Next;
+        Inc(I);
+    End;
+    If PointerAccount <> nil then
+    Begin
+        If TempComboAccount <> '' then
+            ComboBoxAccount.Items.Add(TempComboAccount);
+        ComboBoxAccount.Items.Add('...');
+    End;
+End;
+
+
+Procedure TFormCreateRecordJournal.ComboBoxActionChange(Sender: TObject);
+Begin
+    If ComboBoxAction.ItemIndex = 1 then
+    Begin
+        ComboBoxCategory.Enabled := True;
+        ComboBoxCategory.ItemIndex := -1;
+        ComboBoxAccount.Enabled := True;
+
+    End
+    Else
+    Begin
+        ComboBoxCategory.Enabled := False;
+        ComboBoxCategory.ItemIndex := -1;
+        ComboBoxAccount.Enabled := True;
+    End;
+
+    CheckFieldsNotEmpty;
+
+End;
+
+
+
+procedure TFormCreateRecordJournal.ComboBoxCategoryChange(Sender: TObject);
+Begin
+    If TempComboCategory <> '' then
+    Begin
+        If ComboBoxCategory.ItemIndex = 6 then
+            FormChoiceCategory.Show
+    End
+    Else If ComboBoxCategory.ItemIndex = 5 then
+        FormChoiceCategory.Show;
+
+    CheckFieldsNotEmpty;
+End;
+
+Procedure TFormCreateRecordJournal.ComboBoxCategoryDropDown(Sender: TObject);
+Var
+    I: Integer;
+    Linne: String;
+Begin
+    ComboBoxCategory.Items.Clear;
+    ComboBoxCategory.Items.Clear;
+    PointerCategory := HeadCategory^.Next^.Next^.Next;
+    I := 0;
+    While (I < 5) and (PointerCategory <> nil) do
+    Begin
+        ComboBoxCategory.Items.Add(PointerCategory^.Name);
+        PointerCategory := PointerCategory^.Next;
+        Inc(I);
+    End;
+    If PointerCategory <> nil then
+    Begin
+        If TempComboCategory <> '' then
+            ComboBoxCategory.Items.Add(TempComboCategory);
+        ComboBoxCategory.Items.Add('...');
+    End;
+End;
+
+
+Procedure TFormCreateRecordJournal.ComboBoxAccountChange(Sender: TObject);
+Begin
+    If TempComboAccount <> '' then
+    Begin
+        If ComboBoxAccount.ItemIndex = 6 then
+            FormChoiceAccount.Show
+    End
+    Else If ComboBoxAccount.ItemIndex = 5 then
+        FormChoiceAccount.Show;
+
+    CheckFieldsNotEmpty;
+End;
+
+
+Procedure TFormCreateRecordJournal.ButtonExitClick(Sender: TObject);
+Begin
+    Close();
+End;
+
+Procedure TFormCreateRecordJournal.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    FillJournal(FormMain.StringGridJournal);
+    TempComboAccount := '';
+    ComboBoxAction.ItemIndex := -1;
+    ComboBoxAccount.ItemIndex := -1;
+    ComboBoxCategory.ItemIndex := -1;
+    EditAmount.Clear;
+    EditComment.Clear;
+    ComboBoxAccount.Enabled := False;
+    ComboBoxCategory.Enabled := False;
+End;
+
+End.

@@ -1,0 +1,133 @@
+Unit DeleteCategory;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids;
+
+Type
+    TFormDeleteCategory = class(TForm)
+        LabelName: TLabel;
+        StringGridCategory: TStringGrid;
+        ButtonExecute: TButton;
+        EditName: TEdit;
+        LabelWarningIndex: TLabel;
+    procedure FormShow(Sender: TObject);
+    procedure ButtonExecuteClick(Sender: TObject);
+    procedure EditNameChange(Sender: TObject);
+    procedure StringGridCategoryDrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
+    procedure StringGridCategorySelectCell(Sender: TObject; ACol, ARow: Integer;
+      var CanSelect: Boolean);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+
+    Private
+        Procedure DeleteCategoryElement();
+        Procedure DeleteCategoryStringGrid();
+    Public
+        { Public declarations }
+    End;
+
+Var
+  FormDeleteCategory: TFormDeleteCategory;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, Category, UnitProcedure;
+
+
+
+Procedure TFormDeleteCategory.FormShow(Sender: TObject);
+Begin
+    EditName.Clear;
+    SetStartCategory(StringGridCategory);
+    FillCategory(StringGridCategory);
+End;
+
+
+Procedure TFormDeleteCategory.DeleteCategoryElement();
+Var
+    CurrentPointer: PMainCategory;
+    I: Integer;
+Begin
+    DataHasChanged := True;
+    PointerCategory := HeadCategory;
+    While PointerCategory^.Next^.Name <> EditName.Text do
+        PointerCategory := PointerCategory^.Next;
+
+    CurrentPointer := PointerCategory^.Next;
+    PointerCategory^.Next := CurrentPointer^.Next;
+    CurrentPointer^.Next := nil;
+    Dispose(CurrentPointer);
+    If PointerCategory^.Next = nil then
+        TailCategory := PointerCategory;
+    HeadCategory^.ID := HeadCategory^.ID - 1;
+End;
+
+
+Procedure TFormDeleteCategory.DeleteCategoryStringGrid();
+Var
+    I: Integer;
+Begin
+    For I := FindIndexStringGrid(StringGridCategory, EditName, 0) to StringGridCategory.RowCount - 1 do
+        StringGridCategory.Cells[0,I] := StringGridCategory.Cells[0,I + 1];
+    StringGridCategory.RowCount := StringGridCategory.RowCount - 1;
+End;
+
+
+Procedure TFormDeleteCategory.ButtonExecuteClick(Sender: TObject);
+Begin
+    DeleteCategoryElement();
+    DeleteCategoryStringGrid();
+    EditName.Clear;
+End;
+
+
+Procedure TFormDeleteCategory.EditNameChange(Sender: TObject);
+Var
+    Line: String;
+Begin
+    Line := FindLineStringGrid(StringGridCategory, EditName, 0);
+    If EditName.Text = '' then
+    Begin
+        LabelWarningIndex.Visible := False;
+        ButtonExecute.Enabled := False;
+    End
+    Else If Line = '' then
+    Begin
+        LabelWarningIndex.Visible := True;
+        ButtonExecute.Enabled := False;
+    End
+    Else
+    Begin
+        ButtonExecute.Enabled := True;
+        LabelWarningIndex.Visible := False;
+        EditName.Text := Line;
+    End;
+End;
+
+
+Procedure TFormDeleteCategory.StringGridCategorySelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+Begin
+    If ARow <> 0 then
+        EditName.Text := StringGridCategory.Cells[0, ARow];
+End;
+
+
+Procedure TFormDeleteCategory.StringGridCategoryDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    FillColorInGrid(StringGridCategory, ACol, ARow, Rect, State);
+    FillColorChoiceRecord(StringGridCategory, ACol, ARow, Rect, State);
+End;
+
+
+Procedure TFormDeleteCategory.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    EditName.Clear;
+    FillCategory(FormCategory.StringGridCategory);
+End;
+
+End.

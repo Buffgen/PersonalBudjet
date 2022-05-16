@@ -1,0 +1,62 @@
+Unit ChoiceCategory;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids;
+
+Type
+    TFormChoiceCategory = class(TForm)
+        StringGridCategory: TStringGrid;
+        ButtonExecute: TButton;
+
+    procedure FormShow(Sender: TObject);
+    procedure StringGridCategoryDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure ButtonExecuteClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormChoiceCategory: TFormChoiceCategory;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, ExpenseJournal, CreateRecordJournal, Journal;
+
+
+
+Procedure TFormChoiceCategory.FormShow(Sender: TObject);
+Begin
+    SetStartCategory(StringGridCategory);
+    FillCategory(StringGridCategory);
+End;
+
+
+Procedure TFormChoiceCategory.ButtonExecuteClick(Sender: TObject);
+Begin
+    If StringGridCategory.Row <> 0 then
+        Close();
+End;
+
+
+Procedure TFormChoiceCategory.StringGridCategoryDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    FillColorInGrid(StringGridCategory, ACol, ARow, Rect, State);
+    FillColorChoiceRecord(StringGridCategory, ACol, ARow, Rect, State);
+End;
+
+
+Procedure TFormChoiceCategory.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    PushResultsInComboBox(StringGridCategory, TempComboCategory, FormExpenseJournal.ComboBoxCategory)
+End;
+
+End.

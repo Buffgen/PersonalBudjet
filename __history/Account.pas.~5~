@@ -1,0 +1,263 @@
+Unit Account;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Grids;
+
+Type
+    TFormAccount = class(TForm)
+        LabelWarning: TLabel;
+        StringGridAccount: TStringGrid;
+    ButtonExecute: TButton;
+        ComboBoxParameters: TComboBox;
+    EditIndex: TEdit;
+    LabelChangeAccount: TLabel;
+    EditNumber: TEdit;
+    EditBalance: TEdit;
+
+
+    procedure FormShow(Sender: TObject);
+    procedure ComboBoxParametersChange(Sender: TObject);
+    procedure ComboBoxParametersKeyPress(Sender: TObject; var Key: Char);
+    procedure ComboBoxParametersClick(Sender: TObject);
+    procedure StringGridAccountSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+    procedure ButtonExecuteClick(Sender: TObject);
+    Procedure FillGridAccount();
+    Procedure ClearEdits();
+    procedure EditIndexChange(Sender: TObject);
+    procedure EditNumberChange(Sender: TObject);
+    procedure EditBalanceChange(Sender: TObject);
+
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormAccount: TFormAccount;
+
+Implementation
+    {$R *.dfm}
+
+
+
+
+Uses
+    Main, UnitProcedure;
+
+
+
+Procedure TFormAccount.FillGridAccount();
+Var
+    I: Integer;
+Begin
+    AccountList := HeadAccount^.Next;
+    For I := 1 to HeadAccount^.ID do
+    Begin
+        StringGridAccount.Cells[0,I] := IntToStr(I);
+        StringGridAccount.Cells[1,I] := AccountList^.Number;
+        StringGridAccount.Cells[2,I] := FloatToStr(AccountList^.Balance);
+        AccountList := AccountList^.Next;
+    End;
+End;
+
+
+Procedure TFormAccount.ClearEdits();
+Begin
+    EditIndex.Clear;
+    EditNumber.Clear;
+    EditBalance.Clear;
+End;
+
+
+Procedure TFormAccount.FormShow(Sender: TObject);
+Begin
+    ClearEdits();
+    With StringGridAccount do
+    Begin
+        RowCount := HeadAccount^.ID + 1;
+
+        ColWidths[0] := 60;
+        ColWidths[1] := 190;
+        ColWidths[2] := 230;
+
+        Cells[0,0] := '№';
+        Cells[1,0] := 'Счёт';
+        Cells[2,0] := 'Баланс';
+    End;
+    FillGridAccount();
+End;
+
+
+Procedure TFormAccount.ButtonExecuteClick(Sender: TObject);
+Var
+    //Salary: Double;
+    I, J: Integer;
+    CurrentPointer: PAccount;
+Begin
+    Case ComboBoxParameters.ItemIndex of
+    0:
+        Begin
+            AccountList := HeadAccount;
+            For I := 1 to StrToInt(EditIndex.Text) do
+                AccountList := AccountList^.Next;
+
+            AccountList^.Balance := AccountList^.Balance + StrToFloat(EditBalance.Text);
+
+            StringGridAccount.Cells[2, StrToInt(EditIndex.Text)] := FloatToStr(AccountList^.Balance);
+        End;
+    1:
+        Begin
+            AccountList := TailAccount;
+            New(AccountList^.Next);
+            AccountList := AccountList^.Next;
+            AccountList^.ID := TailAccount^.ID + 1;
+            AccountList^.Number := EditNumber.Text;
+            AccountList^.Balance := 0;
+            TailAccount := AccountList;
+            HeadAccount^.ID := HeadAccount^.ID + 1;
+
+            StringGridAccount.RowCount :=  StringGridAccount.RowCount + 1;
+            StringGridAccount.Cells[0 ,StringGridAccount.RowCount - 1] := IntToStr(AccountList^.ID);
+            StringGridAccount.Cells[1 ,StringGridAccount.RowCount - 1] := AccountList^.Number;
+            StringGridAccount.Cells[2 ,StringGridAccount.RowCount - 1] := FloatToStr(AccountList^.Balance);
+
+
+            AccountList := HeadAccount;
+            For I := 0 to StrToInt(EditIndex.Text) do
+                AccountList := AccountList^.Next;
+
+            CurrentPointer := AccountList^.Next;
+            AccountList^.Next := CurrentPointer^.Next;
+            CurrentPointer^.Next := nil;
+            CurrentPointer := nil;
+            Dispose(CurrentPointer);
+
+            For I := StrToInt(EditIndex.Text) to StringGridAccount.RowCount - 1 do
+            Begin
+                For J := 0 to 2 do
+                    StringGridAccount.Cells[J,I] := StringGridAccount.Cells[J,I + 1];
+            End;
+            StringGridAccount.RowCount := StringGridAccount.RowCount - 1;
+        End;
+    2:
+        Begin
+            AccountList := HeadAccount;
+            For I := 0 to StrToInt(EditIndex.Text) do
+                AccountList := AccountList^.Next;
+
+            CurrentPointer := AccountList^.Next;
+            AccountList^.Next := CurrentPointer^.Next;
+            CurrentPointer^.Next := nil;
+            CurrentPointer := nil;
+            Dispose(CurrentPointer);
+
+            For I := StrToInt(EditIndex.Text) to StringGridAccount.RowCount - 1 do
+            Begin
+                For J := 0 to 2 do
+                    StringGridAccount.Cells[J,I] := StringGridAccount.Cells[J,I + 1];
+            End;
+            StringGridAccount.RowCount := StringGridAccount.RowCount - 1;
+        End;
+    End;
+    ClearEdits();
+End;
+
+
+Procedure TFormAccount.ComboBoxParametersClick(Sender: TObject);
+Begin
+    ComboBoxParameters.SelLength := 0;
+End;
+
+
+Procedure TFormAccount.ComboBoxParametersKeyPress(Sender: TObject; Var Key: Char);
+Begin
+    Key := #0;
+End;
+
+
+Procedure CheckEditForButton(Line: String; Button: TButton);
+Begin
+    If (Line = 'Индекс') or (Line = '') then
+        Button.Enabled := False
+    Else
+        Button.Enabled := True;
+End;
+
+
+Procedure TFormAccount.EditBalanceChange(Sender: TObject);
+Begin
+    CheckEditForButton(EditBalance.Text, ButtonExecute);
+End;
+
+
+Procedure TFormAccount.EditIndexChange(Sender: TObject);
+Begin
+    CheckEditForButton(EditIndex.Text, ButtonExecute);
+End;
+
+
+procedure TFormAccount.EditNumberChange(Sender: TObject);
+Begin
+    CheckEditForButton(EditNumber.Text, ButtonExecute);
+End;
+
+
+Procedure TFormAccount.ComboBoxParametersChange(Sender: TObject);
+Begin
+    ClearEdits();
+    EditIndex.Enabled := False;
+    EditNumber.Enabled := False;
+    EditBalance.Enabled := False;
+    If ComboBoxParameters.Text = 'Выберите действие' then
+    Begin
+        EditIndex.Text := 'Индекс';
+        EditNumber.Text := 'Счёт';
+        EditBalance.Text := 'Сумма';
+    End
+    Else If (ComboBoxParameters.ItemIndex = 0) and (StringGridAccount.Cells[0, 1] <> '') then
+    Begin
+        EditIndex.Enabled := True;
+        EditNumber.Enabled := False;
+        EditBalance.Enabled := True;
+    End
+    Else If (ComboBoxParameters.ItemIndex = 1) then
+    Begin
+        EditIndex.Text := IntToStr(HeadAccount^.ID + 1);
+        EditIndex.Enabled := False;
+        EditNumber.Enabled := True;
+        EditBalance.Enabled := True;
+    End
+    Else If (ComboBoxParameters.ItemIndex = 2) and (StringGridAccount.Cells[0, 1] <> '')  then
+    Begin
+        EditIndex.Enabled := True;
+        EditNumber.Enabled := False;
+        EditBalance.Enabled := False;
+    End;
+End;
+
+
+Procedure TFormAccount.StringGridAccountSelectCell(Sender: TObject; ACol, ARow: Integer; Var CanSelect: Boolean);
+Begin
+    If ARow <> 0 then
+    Begin
+        If (ComboBoxParameters.ItemIndex = 0) then
+        Begin
+            EditIndex.Text := StringGridAccount.Cells[0, ARow];
+            EditNumber.Text := StringGridAccount.Cells[1, ARow];
+            EditBalance.Text := '0';
+        End
+        Else If (ComboBoxParameters.ItemIndex = 2)  then
+        Begin
+            EditIndex.Text := StringGridAccount.Cells[0, ARow];
+            EditNumber.Text := StringGridAccount.Cells[1, ARow];
+            EditBalance.Text := StringGridAccount.Cells[2, ARow];
+        End;
+    End;
+End;
+
+End.

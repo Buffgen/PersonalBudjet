@@ -1,0 +1,34 @@
+unit EditCategory;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Buttons;
+
+type
+  TFormEditCategory = class(TForm)
+    PanelEditCategory: TPanel;
+    EditCategoryOldName: TEdit;
+    EditCategoryNewName: TEdit;
+    LabelOldName: TLabel;
+    Label1: TLabel;
+    ButtonAdd: TSpeedButton;
+    ButtonExit: TSpeedButton;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  FormEditCategory: TFormEditCategory;
+
+implementation
+
+{$R *.dfm}
+
+uses Category;
+
+end.

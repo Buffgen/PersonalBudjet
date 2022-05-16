@@ -1,0 +1,241 @@
+Unit UnitFilterProcedure;
+
+Interface
+
+Uses
+    System.SysUtils, Vcl.Grids, System.Math, Winapi.Windows, Winapi.Messages, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, DateUtils, Main;
+
+
+    Function ActionMonthsInYear(Var StringGridJournal: TStringGrid; InputAccount, InputYear: String): TStringMatrix;
+    Function ActionLastOperation(Var StringGridJournal: TStringGrid; InputAccount: String): TStringMatrix;
+    Function ActionCategoryOfAccount(Var StringGridJournal: TStringGrid; InputAccount, Year, Month: String; IsAccount: Boolean): TStringMatrix;
+
+Implementation
+
+
+Uses
+    UnitProcedure;
+
+
+
+Function StringMatch(Var StringGridJournal: TStringGrid; InputAccount: String): TStringMatrix;
+Var
+    I: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If StringGridJournal.Cells[1, I] = InputAccount then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+
+    StringMatch := StringMatrix;
+End;
+
+
+Function DefiniteYear(InputDate: String): String;
+Var
+    I: Integer;
+    OutputString: String;
+Begin
+    OutputString := '';
+    I := Length(InputDate);
+    While (InputDate[I] <> '.') and (I <> 0) do
+        Dec(I);
+
+    OutputString := Copy(InputDate, I + 1, Length(InputDate));
+
+    DefiniteYear := OutputString;
+End;
+
+
+Function YearEquals(Var StringGridJournal: TStringGrid; InputYear: String): TStringMatrix;
+Var
+    I: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If DefiniteYear(StringGridJournal.Cells[4, I]) = InputYear then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+
+    YearEquals := StringMatrix;
+End;
+
+
+Function FillPrepareMonthsMatrix(): TStringMatrix;
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 12, 3);
+    For I := 0 to High(StringMatrix) do
+        For J := 0 to High(StringMatrix[0]) do
+            If (J = 0) then
+                StringMatrix[I,J] := IntToStr(I + 1)
+            Else
+                StringMatrix[I,J] := IntToStr(0);
+
+    FillPrepareMonthsMatrix := StringMatrix;
+End;
+
+
+Function FillMatrixMonthsInYear(Var StringGridJournal: TStringGrid): TStringMatrix;
+Var
+    I, Month: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    StringMatrix := FillPrepareMonthsMatrix();
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        Month := StrToInt(Copy(StringGridJournal.Cells[4, I], Pos('.', StringGridJournal.Cells[4, I]) + 1, 2));
+        If StrToFloat(StringGridJournal.Cells[3, I]) < 0 then
+            StringMatrix[Month - 1, 2] := FloatToStr(StrToFloat(StringMatrix[Month - 1, 2]) + Abs(StrToFloat(StringGridJournal.Cells[3, I])))
+        Else
+            StringMatrix[Month - 1, 1] := FloatToStr(StrToFloat(StringMatrix[Month - 1, 1]) + StrToFloat(StringGridJournal.Cells[3, I]))
+    End;
+    FillMatrixMonthsInYear := StringMatrix;
+End;
+
+
+Function FillMatrixLastOperation(Var StringGridJournal: TStringGrid): TStringMatrix;
+Var
+    I, MaxIndex: Integer;
+    MaxDate: TDate;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    MaxIndex := 1;
+    MaxDate := StrToDate('30.12.1899');
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If MaxDate <= StrToDate(StringGridJournal.Cells[4, I]) then
+        Begin
+            MaxIndex := I;
+            MaxDate := StrToDate(StringGridJournal.Cells[4, I]);
+        End;
+    End;
+    DataFromRecordToMatrix(StringGridJournal, StringMatrix, MaxIndex);
+    FillMatrixLastOperation := StringMatrix
+End;
+
+
+Function MonthAndYearEquals(Var StringGridJournal: TStringGrid; Year, Month: String): TStringMatrix;
+Var
+    I: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If (YearOf(StrToDate(StringGridJournal.Cells[4, I])) = StrToInt(Year)) and (MonthOf(StrToDate(StringGridJournal.Cells[4, I])) = StrToInt(Month)) then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+    MonthAndYearEquals := StringMatrix
+End;
+
+
+Procedure PrepareArrBoolean(Var ArrBoolean: Array of Boolean);
+Var
+    I: Integer;
+Begin
+    For I := 0 to High(ArrBoolean) do
+        ArrBoolean[I] := True;
+End;
+
+Function FillMatrixCategoryOfAccount(Var StringGridJournal: TStringGrid): TStringMatrix;
+Var
+    I, J, Counter: Integer;
+    ArrBoolean: Array of Boolean;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    SetLength(ArrBoolean, StringGridJournal.RowCount - 1);
+    PrepareArrBoolean(ArrBoolean);
+    Counter := 0;
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If (ArrBoolean[I - 1]) and (StringGridJournal.Cells[2, I] <> HeadCategory^.Next^.Name) then
+        Begin
+            Inc(Counter);
+            SetLength(StringMatrix, Counter, 2);
+            StringMatrix[Counter - 1, 0] := StringGridJournal.Cells[2, I];
+            StringMatrix[Counter - 1, 1] := '0';
+            For J := I to StringGridJournal.RowCount - 1 do
+            Begin
+                If StringGridJournal.Cells[2, J] = StringGridJournal.Cells[2, I] then
+                Begin
+                    If StrToFloat(StringGridJournal.Cells[3, J]) < 0 then
+                        StringMatrix[Counter - 1, 1] := FloatToStr(StrToFloat(StringMatrix[Counter - 1, 1]) + Abs(StrToFloat(StringGridJournal.Cells[3, J])));
+                    ArrBoolean[J - 1] := False;
+                End;
+            End;
+        End;
+    End;
+    FillMatrixCategoryOfAccount := StringMatrix;
+End;
+
+
+// расходы и доходы по каждому месяцу в течении указанного года
+Function ActionMonthsInYear(Var StringGridJournal: TStringGrid; InputAccount, InputYear: String): TStringMatrix;
+Var
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    InputAccount := AnsiUpperCase(InputAccount);
+    FillJournal(StringGridJournal);
+    StringMatrix := StringMatch(StringGridJournal, InputAccount);
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+    StringMatrix := YearEquals(StringGridJournal, InputYear);
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+    StringMatrix := FillMatrixMonthsInYear(StringGridJournal);
+    ActionMonthsInYear := StringMatrix;
+End;
+
+// последняя операции по счету
+Function ActionLastOperation(Var StringGridJournal: TStringGrid; InputAccount: String): TStringMatrix;
+Var
+    StringMatrix: TStringMatrix;
+    I: Integer;
+Begin
+    For I := 0 to StringGridJournal.RowCount - 1 do
+        StringGridJournal.Rows[I].Clear;
+
+    SetLength(StringMatrix, 0, 0);
+    InputAccount := AnsiUpperCase(InputAccount);
+    FillJournal(StringGridJournal);
+    StringMatrix := StringMatch(StringGridJournal, InputAccount);
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+    DataFromRecordToMatrix(StringGridJournal, StringMatrix, 1);
+    //StringMatrix := FillMatrixLastOperation(StringGridJournal);
+
+    ActionLastOperation := StringMatrix;
+End;
+
+
+// 1. общая сумма расходов по каждой категории за указанный месяц года по счету
+// 2. общая сумма расходов по каждой категории за указанный месяц года по всем счетам
+Function ActionCategoryOfAccount(Var StringGridJournal: TStringGrid; InputAccount, Year, Month: String; IsAccount: Boolean): TStringMatrix;
+Var
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    FillJournal(StringGridJournal);
+    If IsAccount then
+    Begin
+        InputAccount := AnsiUpperCase(InputAccount);
+        StringMatrix := StringMatch(StringGridJournal, InputAccount);
+        DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+    End;
+    StringMatrix := MonthAndYearEquals(StringGridJournal, Year, Month);
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+    StringMatrix := FillMatrixCategoryOfAccount(StringGridJournal);
+
+    ActionCategoryOfAccount := StringMatrix;
+End;
+
+End.

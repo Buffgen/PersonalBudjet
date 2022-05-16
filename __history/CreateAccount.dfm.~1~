@@ -1,0 +1,95 @@
+object FormCreateAccount: TFormCreateAccount
+  Left = 0
+  Top = 0
+  Caption = #1057#1086#1079#1076#1072#1090#1100' '#1089#1095#1105#1090
+  ClientHeight = 325
+  ClientWidth = 635
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnClose = FormClose
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object LabelIndex: TLabel
+    Left = 126
+    Top = 239
+    Width = 21
+    Height = 16
+    Caption = #8470':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelNumber: TLabel
+    Left = 196
+    Top = 239
+    Width = 36
+    Height = 16
+    Caption = #1057#1095#1105#1090':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object EditIndex: TEdit
+    Left = 126
+    Top = 261
+    Width = 50
+    Height = 21
+    Enabled = False
+    MaxLength = 5
+    TabOrder = 0
+    OnKeyPress = EditIndexKeyPress
+  end
+  object EditNumber: TEdit
+    Left = 196
+    Top = 261
+    Width = 180
+    Height = 21
+    Enabled = False
+    MaxLength = 20
+    TabOrder = 1
+  end
+  object StringGridAccount: TStringGrid
+    Left = 48
+    Top = 8
+    Width = 483
+    Height = 217
+    ColCount = 3
+    DefaultColWidth = 144
+    FixedCols = 0
+    RowCount = 8
+    FixedRows = 0
+    TabOrder = 2
+    OnDrawCell = StringGridAccountDrawCell
+    OnSelectCell = StringGridAccountSelectCell
+    RowHeights = (
+      24
+      24
+      24
+      24
+      24
+      24
+      24
+      24)
+  end
+  object ButtonExecute: TButton
+    Left = 448
+    Top = 256
+    Width = 83
+    Height = 32
+    Caption = #1057#1086#1079#1076#1072#1090#1100' '#1089#1095#1105#1090
+    TabOrder = 3
+    OnClick = ButtonExecuteClick
+  end
+end

@@ -1,0 +1,953 @@
+Unit UnitProcedure;
+
+Interface
+
+Uses
+    System.SysUtils, Vcl.Grids, System.Math, Winapi.Windows, Winapi.Messages,
+    System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms,
+    Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, VclTee.TeeGDIPlus, VCLTee.TeEngine,
+    VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart,DateUtils, Main, Journal;
+
+    Function TryConvertInDouble (Line: String; Var Salary: Double): Boolean;
+    Function CheckKeyEditMoney(Line: String; CursorPos: Integer; SelLength: Integer; Key: Char): Char;
+    Function CheckKeyEditIndex (Line: String; CursorPos: Integer; SelLength: Integer; Key: Char): Char;
+    Procedure PushResultsInComboBox(Var StringGridRecords: TStringGrid; Var TempCombo: String; Var ComboBoxParameters: TComboBox);
+    Function FindLineInAccountList(InputLine: String; Amount: Double; IsChange: Boolean): Boolean;
+    Function MakeLettersInCategoryFormat(InputLine: String): String;
+    Procedure ChangeCategoryOfListJournal(OldName, NewName: String);
+    Procedure ChangeCategoryStringGridJournal(Var StringGridJournal: TStringGrid; OldName, NewName: String);
+    //Function FindIndexStringGrid(Var StringGridRecords: TStringGrid; Var EditName: TEdit; IndexColumn: Integer): Integer;
+    //Function FindLineStringGrid(Var StringGridAccount: TStringGrid; Var EditIndex: TEdit; IndexColumn: Integer): String;
+
+    Procedure FillIncomeJournal(Var StringGridJournal: TStringGrid);
+    Procedure SetStartIncomeJournal(Var StringGridJournal: TStringGrid);
+    Procedure FillJournal(Var StringGridJournal: TStringGrid);
+    Procedure SetStartJournal(Var StringGridJournal: TStringGrid);
+    Procedure FillCategory(Var StringGridCategory: TStringGrid);
+    Procedure SetStartCategory(Var StringGridCategory: TStringGrid);
+    Procedure FillAccountsListShort(Var StringGridAccountsListShort: TStringGrid);
+    Procedure SetStartAccountsListShort(Var StringGridAccountsListShort: TStringGrid);
+    Procedure FillAccount(Var StringGridAccount: TStringGrid);
+    Procedure SetStartAccount(Var StringGridAccount: TStringGrid);
+    Procedure SetStartLastAccountAction(Var StringGridLastAccountAction: TStringGrid);
+
+    //Procedure DataFromListToGrid(Var StringGridJournal: TStringGrid);
+    Procedure DataFromRecordToMatrix(Var StringGridJournal: TStringGrid; Var StringMatrix: TStringMatrix; I: Integer);
+    Procedure DataFromMatrixToGrid(Var StringGridJournal: TStringGrid; Var StringMatrix: TStringMatrix);
+    Procedure FillGridLastAccountAction(Var StringGridLastAccountAction: TStringGrid; StringGridJournal: TStringGrid; InputAccount: String);
+    Procedure FillChartTabAccounts(StringGridJournal: TStringGrid; InputAccount, InputYear: String);
+    Procedure FillChartTabReports(ChartTabReports: TChart; StringGridJournal: TStringGrid; InputAccount, InputYear, InputMonth: String; IsAccount, IsMonth: Boolean);
+    Procedure DeleteJournalElement(StringGridJournalRowIndex: Integer);
+    Procedure DeleteAccountElement(StringGridAccountsRowIndex: Integer);
+    Procedure ClearGrid (Var StringGrid: TStringGrid);
+    Procedure ResetTabReportsObjects();
+    Procedure DeleteCurrentOneCategoryElement(Var PointerCategory: PMainCategory);
+    Procedure DeleteCurrentOneJournalElement(Var PointerJournal: PJournal);
+    Procedure DeleteCurrentOneAccountElement(Var PointerAccount: PAccount);
+
+
+
+Implementation
+
+Uses
+    UnitFilterProcedure;
+
+//Procedure DataFromListToGrid(Var StringGridJournal: TStringGrid);
+//Var
+//    I: Integer;
+//Begin
+//    PointerJournal := HeadJournal;
+//    StringGridJournal.RowCount := HeadJournal^.ID + 1;
+//    For I := 1 to StringGridJournal.RowCount - 1 do
+//    Begin
+//        PointerJournal := PointerJournal^.Next;
+//        StringGridJournal.Cells[0, I] := IntToStr(PointerJournal^.ID);
+//        StringGridJournal.Cells[1, I] := PointerJournal^.Account;
+//        StringGridJournal.Cells[2, I] := PointerJournal^.Category;
+//        StringGridJournal.Cells[3, I] := FloatToStr(PointerJournal^.Amount);
+//        StringGridJournal.Cells[4, I] := DateToStr(PointerJournal^.Date);
+//        StringGridJournal.Cells[5, I] := PointerJournal^.Comment;
+//    End;
+//End;
+
+Procedure ChangeCategoryStringGridJournal(Var StringGridJournal: TStringGrid; OldName, NewName: String);
+Var
+    I: Integer;
+Begin
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If StringGridJournal.Cells[2, I] = OldName then
+            StringGridJournal.Cells[2, I] := NewName
+    End;
+End;
+
+
+Procedure ChangeCategoryOfListJournal(OldName, NewName: String);
+Var
+    I: Integer;
+Begin
+    PointerJournal := HeadJournal^.Next;
+    While (PointerJournal <> nil) do
+    Begin
+        If PointerJournal^.Category = OldName then
+            PointerJournal^.Category := NewName;
+
+        PointerJournal := PointerJournal^.Next;
+    End;
+End;
+
+
+Procedure DataFromRecordToMatrix(Var StringGridJournal: TStringGrid; Var StringMatrix: TStringMatrix; I: Integer);
+Var
+    J: Integer;
+Begin
+    SetLength(StringMatrix, Length(StringMatrix) + 1, 6);
+    For J := 0 to 5 do
+        StringMatrix[Length(StringMatrix) - 1, J] := StringGridJournal.Cells[J, I];
+End;
+
+
+Procedure DataFromMatrixToGrid(Var StringGridJournal: TStringGrid; Var StringMatrix: TStringMatrix);
+Var
+    I, J: Integer;
+Begin
+    For I := 0 to StringGridJournal.RowCount - 1 do
+        StringGridJournal.Rows[I].Clear;
+    StringGridJournal.RowCount := Length(StringMatrix) + 1;
+    For I := 0 to Length(StringMatrix) - 1 do
+    Begin
+        If (StringMatrix[I, 3][1] <> '+') and (StringMatrix[I, 3][1] <> '-')then
+            StringMatrix[I, 3] := '+' + StringMatrix[I, 3];
+
+        For J := 0 to 5 do
+            StringGridJournal.Cells[J, I + 1] := StringMatrix[I, J];
+    End;
+    SetLength(StringMatrix, 0, 0);
+End;
+
+
+Procedure FillOptionsBarTabCharts();
+Var
+    I, J, Counter: Integer;
+Begin
+    //FormMain.ComboBoxTabChartAccount.
+
+
+End;
+
+
+
+
+
+//==============================================================================
+//------------------------------------------------------------------------------
+Procedure FillIncomeJournal(Var StringGridJournal: TStringGrid);
+Var
+    I, J, Counter: Integer;
+Begin
+    PointerJournal := HeadJournal;
+    StringGridJournal.RowCount := HeadJournal^.ID + 1;
+    Counter := 1;
+    For I := 1 to HeadJournal^.ID do
+    Begin
+        For J := Counter to HeadJournal^.ID do
+            PointerJournal := PointerJournal^.Next;
+
+        StringGridJournal.Cells[0,I] := IntToStr(PointerJournal^.ID);
+        StringGridJournal.Cells[1,I] := PointerJournal^.Account;
+        StringGridJournal.Cells[2,I] := FloatToStr(SimpleRoundTo(PointerJournal^.Amount, -2));
+        If PointerJournal^.Amount > 0 then
+            StringGridJournal.Cells[2,I] := '+' + StringGridJournal.Cells[2,I];
+        StringGridJournal.Cells[3,I] := DateTimeToStr(PointerJournal^.Date);
+        StringGridJournal.Cells[4,I] := PointerJournal^.Comment;
+        Inc(Counter);
+        PointerJournal := HeadJournal;
+    End;
+End;
+
+
+Procedure SetStartIncomeJournal(Var StringGridJournal: TStringGrid);
+Begin
+    With StringGridJournal do
+    Begin
+        RowCount := 2;
+        ColWidths[0] := 60;
+        ColWidths[1] := 190;
+        ColWidths[2] := 100;
+        ColWidths[3] := 120;
+        ColWidths[4] := 200;
+
+        Cells[0,0] := 'ID';
+        Cells[1,0] := 'Счёт';
+        Cells[2,0] := 'Сумма';
+        Cells[3,0] := 'Дата';
+        Cells[4,0] := 'Комментарий'
+    End;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure FillJournal(Var StringGridJournal: TStringGrid);
+Var
+    I, J, Counter: Integer;
+Begin
+    PointerJournal := HeadJournal;
+    StringGridJournal.RowCount := HeadJournal^.ID + 1;
+    Counter := 1;
+    For I := 1 to HeadJournal^.ID do
+    Begin
+        For J := Counter to HeadJournal^.ID do
+            PointerJournal := PointerJournal^.Next;
+        StringGridJournal.Cells[0,I] := IntToStr(PointerJournal^.ID);
+        StringGridJournal.Cells[1,I] := PointerJournal^.Account;
+        StringGridJournal.Cells[2,I] := PointerJournal^.Category;
+        StringGridJournal.Cells[3,I] := FloatToStr(SimpleRoundTo(PointerJournal^.Amount, -2));
+        If PointerJournal^.Amount > 0 then
+            StringGridJournal.Cells[3,I] := '+' + StringGridJournal.Cells[3,I];
+        StringGridJournal.Cells[4,I] := DateTimeToStr(PointerJournal^.Date);
+        StringGridJournal.Cells[5,I] := PointerJournal^.Comment;
+        Inc(Counter);
+        PointerJournal := HeadJournal;
+        //PointerJournal := PointerJournal^.Next;
+    End;
+End;
+
+
+Procedure SetStartJournal(Var StringGridJournal: TStringGrid);
+Begin
+    With StringGridJournal do
+    Begin
+        RowCount := 2;
+        ColWidths[0] := 60;
+        ColWidths[1] := 190;
+        ColWidths[2] := 190;
+        ColWidths[3] := 100;
+        ColWidths[4] := 120;
+        ColWidths[5] := 200;
+
+        Cells[0,0] := 'ID';
+        Cells[1,0] := 'Счёт';
+        Cells[2,0] := 'Категория';
+        Cells[3,0] := 'Сумма';
+        Cells[4,0] := 'Дата';
+        Cells[5,0] := 'Комментарий';
+
+        Options := Options + [goColSizing] + [goRowSelect];
+        Options := Options - [goVertLine] - [goHorzLine] - [goRangeSelect];
+        DrawingStyle := gdsGradient;
+        GradientEndColor := clMoneyGreen;
+        GradientStartColor := clWhite;
+    End;
+End;
+
+
+
+
+Procedure SetStartLastAccountAction(Var StringGridLastAccountAction: TStringGrid);
+Begin
+    With StringGridLastAccountAction do
+    Begin
+        RowCount := 2;
+        ColWidths[0] := 60;
+        ColWidths[1] := 190;
+        ColWidths[2] := 190;
+        ColWidths[3] := 100;
+        ColWidths[4] := 120;
+        ColWidths[5] := 200;
+
+        Cells[0,0] := 'ID';
+        Cells[1,0] := 'Счёт';
+        Cells[2,0] := 'Категория';
+        Cells[3,0] := 'Сумма';
+        Cells[4,0] := 'Дата';
+        Cells[5,0] := 'Комментарий';
+        Options := Options + [goColSizing];
+        Options := Options - [goVertLine] - [goHorzLine] - [goRangeSelect] - [goRowSelect];
+        DrawingStyle := gdsGradient;
+        GradientEndColor := clMoneyGreen;
+        GradientStartColor := clWhite;
+
+
+    End;
+
+
+End;
+
+
+
+// заполнение грида StringGridLastAccountAction (последняя операция по счету)
+Procedure FillGridLastAccountAction(Var StringGridLastAccountAction: TStringGrid; StringGridJournal: TStringGrid; InputAccount: String);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    FillJournal(StringGridJournal);
+    StringMatrix := ActionLastOperation(StringGridJournal, InputAccount);
+    StringGridLastAccountAction.Rows[1].Clear;
+    With StringGridLastAccountAction do
+    Begin
+        For I := 0 to ColCount - 1 do
+            Cells[I,1] := '';
+
+        For J := 0 to High(StringMatrix[0]) do
+            Cells[J, 1] := StringMatrix[0, J];
+    End;
+End;
+
+
+
+// заполнение чарта ChartTabAccounts (доход/расход за каждый месяц указанного года по счету)
+Procedure FillChartTabAccounts(StringGridJournal: TStringGrid; InputAccount, InputYear: String);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+    SeriesIsEmpty: Boolean;
+Begin
+    SeriesIsEmpty := True;
+    FillJournal(StringGridJournal);
+    StringMatrix := ActionMonthsInYear(StringGridJournal, InputAccount, InputYear);
+
+    For I := 0 to High(StringMatrix) do
+        For J := 1 to High(StringMatrix[0]) do
+            If StringMatrix[I, J] <> '0' then
+                SeriesIsEmpty := False;
+
+    If Not SeriesIsEmpty then
+    Begin
+        With FormMain.ChartTabAccounts do
+        Begin
+            Title.Visible := False;
+            Series[0].Marks.Visible := True;
+            Series[1].Marks.Visible := True;
+            Series[0].Marks.Angle := 0;
+            Series[1].Marks.Angle := 0;
+            TAreaSeries(Series[0]).Pointer.Visible := True;
+            TAreaSeries(Series[1]).Pointer.Visible := True;
+            BottomAxis.LabelStyle := talText;
+            Series[0].Clear;
+            Series[1].Clear;
+
+            For I := 0 to High(StringMatrix) do
+            Begin
+                If StrToFloat(StringMatrix[I, 1]) <> 0 then
+                    Series[0].AddXY((StrToInt(StringMatrix[I, 0])-1), StrToFloat(StringMatrix[I, 1]), '', RGB(240,240,240))
+                Else
+                    Series[0].AddNull('');
+
+                If StrToFloat(StringMatrix[I, 2]) <> 0 then
+                    Series[1].AddXY((StrToInt(StringMatrix[I, 0])-1), StrToFloat(StringMatrix[I, 2]), '', RGB(240,240,240))
+                Else
+                    Series[1].AddNull('');
+            End;
+        End;
+    End
+    Else
+    Begin
+        With FormMain.ChartTabAccounts do
+        Begin
+            Title.Visible := True;
+            Series[0].Marks.Visible := False;
+            Series[1].Marks.Visible := False;
+            TAreaSeries(Series[0]).Pointer.Visible := False;
+            TAreaSeries(Series[1]).Pointer.Visible := False;
+            BottomAxis.LabelStyle := talText;
+            Series[0].Clear;
+            Series[1].Clear;
+        End;
+    End;
+End;
+
+
+
+// заполнение чарта ChartTabReports (расход по каждой категории за месяц указанного года по счету)
+Procedure FillChartTabReports(ChartTabReports: TChart; StringGridJournal: TStringGrid; InputAccount, InputYear, InputMonth: String; IsAccount, IsMonth: Boolean);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    FillJournal(StringGridJournal);
+    StringMatrix := ActionCategoryOfAccount(StringGridJournal, InputAccount, InputYear, InputMonth, IsAccount, IsMonth);
+
+    If Length(StringMatrix) > 0 then
+    Begin
+        With ChartTabReports do
+        Begin
+            Title.Text.Clear;
+
+            If IsMonth then
+                Title.Text.Add('Расходы по категориям за месяц')
+            Else
+                Title.Text.Add('Расходы по категориям за год');
+
+            Series[0].Marks.Visible := True;
+            Series[0].Marks.Angle := 0;
+            Series[0].Clear;
+            For I := 0 to High(StringMatrix) do
+            Begin
+                If StrToFloat(StringMatrix[I, 1]) <> 0 then
+                    Series[0].Add(StrToFloat(StringMatrix[I, 1]), StringMatrix[I, 0], clTeeColor)
+                Else
+                    Series[0].AddNull(StringMatrix[I, 0]);
+
+
+            End;
+        End;
+    End
+    Else
+    Begin
+        With ChartTabReports do
+        Begin
+            Title.Text.Clear;
+            Title.Text.Add('В журнале операций данных не найдено!');
+            Series[0].Marks.Visible := False;
+            Series[0].Clear;
+        End;
+    End;
+End;
+
+
+Procedure ResetTabReportsObjects();
+Begin
+    With FormMain do
+    Begin
+        ComboBoxTabReportsAccount.ItemIndex := -1;
+        ComboBoxTabReportsMonth.ItemIndex := MonthNow - 1;
+        PanelTabReportYear.Caption := YearNow;
+        ChartTabReportsTop.Series[0].Clear;
+        ChartTabReportsTop.Title.Clear;
+        ChartTabReportsBottom.Series[0].Clear;
+        ChartTabReportsBottom.Title.Clear;
+    End;
+End;
+
+
+
+
+//------------------------------------------------------------------------------
+Function FindMinNumberIndex(Var StringGridCategory: TStringGrid; MinNumberIndex: Integer): Integer;
+Var
+    I: Integer;
+Begin
+    For I := MinNumberIndex to StringGridCategory.RowCount - 1 do
+        If StringGridCategory.Cells[1, I] < StringGridCategory.Cells[1, MinNumberIndex] then
+            MinNumberIndex := I;
+
+    FindMinNumberIndex := MinNumberIndex;
+End;
+
+
+Procedure SortingCategoryGrid(Var StringGridCategory: TStringGrid);
+Var
+    Counter, MinNumberIndex, I: Integer;
+    ArrString: TStringArr;
+Begin
+    SetLength(ArrString, 2);
+    For Counter := 1 to StringGridCategory.RowCount - 1 do
+    Begin
+        MinNumberIndex := Counter;
+        MinNumberIndex := FindMinNumberIndex(StringGridCategory, MinNumberIndex);
+
+        If Counter <> MinNumberIndex then
+        Begin
+            ArrString[0] := StringGridCategory.Cells[0, Counter];
+            ArrString[1] := StringGridCategory.Cells[1, Counter];
+            StringGridCategory.Cells[0, Counter] := StringGridCategory.Cells[0, MinNumberIndex];
+            StringGridCategory.Cells[1, Counter] := StringGridCategory.Cells[1, MinNumberIndex];
+            StringGridCategory.Cells[0, MinNumberIndex] := ArrString[0];
+            StringGridCategory.Cells[1, MinNumberIndex] := ArrString[1];
+        End;
+    End;
+End;
+
+
+// заполнение грида StringGridCategory ("Категории")
+Procedure FillCategory(Var StringGridCategory: TStringGrid);
+Var
+    I: Integer;
+Begin
+    PointerCategory := HeadCategory^.Next^.Next^.Next;
+    StringGridCategory.RowCount := HeadCategory^.ID -1;
+    For I := 1 to HeadCategory^.ID - 2 do
+    Begin
+        StringGridCategory.Cells[0,I] := IntToStr(PointerCategory^.ID);
+        StringGridCategory.Cells[1,I] := PointerCategory^.Name;
+        PointerCategory := PointerCategory^.Next;
+    End;
+    SortingCategoryGrid(StringGridCategory);
+End;
+
+// установка параметров отображения грида StringGridCategory ("Категории")
+Procedure SetStartCategory(Var StringGridCategory: TStringGrid);
+Begin
+    With StringGridCategory do
+    Begin
+        RowCount := 2;
+
+        ColWidths[0] := 50;
+        ColWidths[1] := 240;
+
+        Cells[0,0] := 'ID';
+        Cells[1,0] := 'Название';
+
+        Options := Options + [goColSizing] + [goRowSelect];
+        Options := Options - [goVertLine] - [goHorzLine] - [goRangeSelect];
+        FixedRows := 1;
+        DrawingStyle := gdsGradient;
+        GradientEndColor := clMoneyGreen;
+        GradientStartColor := clWhite;
+
+    End;
+End;
+
+
+// заполнение грида StringGridAccountsListShort (список счетов для ComboBox)
+Procedure FillAccountsListShort(Var StringGridAccountsListShort: TStringGrid);
+Var
+    I: Integer;
+Begin
+    PointerAccount := HeadAccount^.Next;
+    StringGridAccountsListShort.RowCount := HeadAccount^.ID + 1;
+    For I := 1 to HeadAccount^.ID do
+    Begin
+        StringGridAccountsListShort.Cells[0,I] := IntToStr(PointerAccount^.ID);
+        StringGridAccountsListShort.Cells[1,I] := PointerAccount^.Name;
+        PointerAccount := PointerAccount^.Next;
+    End;
+End;
+
+
+// установка параметров отображения грида StringGridAccountsListShort (список счетов для ComboBox)
+Procedure SetStartAccountsListShort(Var StringGridAccountsListShort: TStringGrid);
+Begin
+    With StringGridAccountsListShort do
+    Begin
+        RowCount := 2;
+
+        ColWidths[0] := 60;
+        ColWidths[1] := 240;
+
+        Cells[0,0] := 'ID';
+        Cells[1,0] := 'Название';
+        Options := Options + [goColSizing] + [goRowSelect];
+        Options := Options - [goVertLine] - [goHorzLine] - [goRangeSelect];
+        FixedRows := 1;
+        DrawingStyle := gdsGradient;
+        GradientEndColor := clMoneyGreen;
+        GradientStartColor := clWhite
+    End;
+End;
+
+
+
+
+
+
+// заполнение грида StringGridAccount ("Счета")
+Procedure FillAccount(Var StringGridAccount: TStringGrid);
+Var
+    I, RowNum: Integer;
+Begin
+    ClearGrid(StringGridAccount);
+
+    PointerAccount := HeadAccount^.Next;
+    StringGridAccount.RowCount := HeadAccount^.ID + 1;
+    For I := 1 to HeadAccount^.ID do
+    Begin
+        StringGridAccount.Cells[0,I] := IntToStr(PointerAccount^.ID);
+        StringGridAccount.Cells[1,I] := PointerAccount^.Name;
+        StringGridAccount.Cells[2,I] := FloatToStr(SimpleRoundTo(PointerAccount^.Balance, -2));
+        PointerAccount := PointerAccount^.Next;
+    End;
+End;
+
+
+// очистка грида, кроме первой строки с названием столбцов
+Procedure ClearGrid (Var StringGrid: TStringGrid);
+Var
+    I: Integer;
+Begin
+    If StringGrid.RowCount > 1 then
+    Begin
+        For I := 1 to StringGrid.RowCount - 1 do
+        Begin
+            StringGrid.Rows[I].Clear;
+        End;
+    End;;
+End;
+
+
+// установка параметров отображения грида StringGridAccount ("Счета")
+Procedure SetStartAccount(Var StringGridAccount: TStringGrid);
+Begin
+    With StringGridAccount do
+    Begin
+        RowCount := 2;
+
+        ColWidths[0] := 60;
+        ColWidths[1] := 190;
+        ColWidths[2] := 230;
+
+        Cells[0,0] := 'ID';
+        Cells[1,0] := 'Счёт';
+        Cells[2,0] := 'Баланс';
+
+        Options := Options + [goColSizing] + [goRowSelect];
+        Options := Options - [goVertLine] - [goHorzLine] - [goRangeSelect];
+        DrawingStyle := gdsGradient;
+        GradientEndColor := clMoneyGreen;
+        GradientStartColor := clWhite;
+
+    End;
+End;
+
+
+Function MakeLettersInCategoryFormat(InputLine: String): String;
+Begin
+    InputLine := AnsiLowerCase(InputLine);
+    InputLine := StringReplace(InputLine, InputLine[1], AnsiUpperCase(InputLine[1]), []);
+    MakeLettersInCategoryFormat := InputLine;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure PushResultsInComboBox(Var StringGridRecords: TStringGrid; Var TempCombo: String; Var ComboBoxParameters: TComboBox);
+Begin
+    If StringGridRecords.Row <> 0 then
+    Begin
+        TempCombo := StringGridRecords.Cells[1, StringGridRecords.Row];
+        ComboBoxParameters.Items.Insert(5, TempCombo);
+        ComboBoxParameters.ItemIndex := 5;
+    End
+    Else
+        ComboBoxParameters.ItemIndex := -1;
+End;
+
+
+Function FindLineInAccountList(InputLine: String; Amount: Double; IsChange: Boolean): Boolean;
+Var
+    IsIncorrect: Boolean;
+    I: Integer;
+    CurrentPointer: PAccount;
+Begin
+    IsIncorrect := False;
+    CurrentPointer := HeadAccount^.Next;
+    InputLine := AnsiUpperCase(InputLine);
+    I := 1;
+    While (CurrentPointer <> nil) and (Not IsIncorrect) do
+    Begin
+        If InputLine = CurrentPointer^.Name then
+        Begin
+            If IsChange then
+                CurrentPointer^.Balance := SimpleRoundTo(CurrentPointer^.Balance + Amount, -2);
+
+            IsIncorrect := True
+        End
+        Else
+            CurrentPointer := CurrentPointer^.Next;
+    End;
+
+    CurrentPointer := nil;
+    //Dispose(CurrentPointer);
+    FindLineInAccountList := IsIncorrect;
+End;
+
+
+////------------------------------------------------------------------------------
+//Function FindIndexStringGrid(Var StringGridRecords: TStringGrid; Var EditName: TEdit; IndexColumn: Integer): Integer;
+//Var
+//    IsCorrect: Boolean;
+//    I, Counter: Integer;
+//    Line: String;
+//Begin
+//    IsCorrect := True;
+//    I := 1;
+//    Counter := -1;
+//    Line := '';
+//    While (I < StringGridRecords.RowCount) and IsCorrect do
+//    Begin
+//        If EditName.Text = StringGridRecords.Cells[IndexColumn,I] then
+//        Begin
+//            IsCorrect := False;
+//            Counter := I;
+//        End
+//        Else
+//            Inc(I);
+//    End;
+//
+//    FindIndexStringGrid := Counter;
+//End;
+//
+//
+//Function FindLineStringGrid(Var StringGridAccount: TStringGrid; Var EditIndex: TEdit; IndexColumn: Integer): String;
+//Var
+//    IsIncorrect: Boolean;
+//    I: Integer;
+//    Line: String;
+//Begin
+//    IsIncorrect := False;
+//    I := 1;
+//    Line := '';
+//    While (I < StringGridAccount.RowCount) and (Not IsIncorrect) do
+//    Begin
+//        If EditIndex.Text = StringGridAccount.Cells[0,I] then
+//        Begin
+//            IsIncorrect := True;
+//            Line := StringGridAccount.Cells[IndexColumn, I];
+//        End
+//        Else
+//            Inc(I);
+//    End;
+//
+//    FindLineStringGrid := Line;
+//End;
+
+
+Function TryConvertInDouble (Line: String; Var Salary: Double): Boolean;
+Var
+    IsCorrect: Boolean;
+Begin
+    IsCorrect := True;
+
+    If Not TryStrToFloat(Line, Salary) then
+        If Not TryStrToFloat(StringReplace(Line, ',', '.', []), Salary) then
+            If Not TryStrToFloat(StringReplace(Line, '.', ',', []), Salary) then
+                IsCorrect := False;
+
+    TryConvertInDouble := IsCorrect;
+End;
+
+
+Function FindPosPoint(Line: String): Integer;
+Var
+    PosPoint: Integer;
+Begin
+    PosPoint := Pos('.', Line);
+    If PosPoint = 0 then
+        PosPoint := Pos(',', Line);
+
+    FindPosPoint := PosPoint;
+End;
+
+
+Function CheckLengthBeforePoint(Line: String; PosPoint: Integer; Symbol: Char): Boolean;
+Var
+    IsCorrect: Boolean;
+Begin
+    IsCorrect := True;
+
+    If (PosPoint = 0) then
+        If(Length(Line) > 5) and (Line[6] <> ',') and (Line[6] <> '.') then
+            IsCorrect := False
+    Else
+        If(Length(Copy(Line, 1, PosPoint - 1)) > 5) then
+            IsCorrect := False;
+
+    CheckLengthBeforePoint := IsCorrect;
+End;
+
+
+Function CheckLengthAfterPoint(Line: String; PosPoint: Integer): Boolean;
+Var
+    IsCorrect: Boolean;
+Begin
+    IsCorrect := True;
+
+    If (PosPoint <> 0) then
+        If(Length(Copy(Line, PosPoint + 1, 3)) > 2) then
+            IsCorrect := False;
+
+    CheckLengthAfterPoint := IsCorrect;
+End;
+
+
+Function CheckKeyEditIndex (Line: String; CursorPos: Integer; SelLength: Integer; Key: Char): Char;
+Var
+    Len: Integer;
+Begin
+    Len := Length(Line);
+    If Key in ['0'..'9', #8] then
+    Begin
+        If (Len <> 0) and (Key <> #8) then
+        Begin
+            If (StrToInt(Line + Key) < 1) then
+                Key := #0;
+        End;
+    End
+    Else
+        Key := #0;
+
+    CheckKeyEditIndex := Key;
+End;
+
+
+Procedure DeleteCurrentOneCategoryElement(Var PointerCategory: PMainCategory);
+Var
+    CurrentPointer: PMainCategory;
+Begin
+    CurrentPointer := PointerCategory^.Next;
+    PointerCategory^.Next := CurrentPointer^.Next;
+    If PointerCategory^.Next = nil then
+        TailCategory := PointerCategory;
+    CurrentPointer^.Next := nil;
+    Dispose(CurrentPointer);
+End;
+
+
+Procedure DeleteCurrentOneJournalElement(Var PointerJournal: PJournal);
+Var
+    CurrentPointer: PJournal;
+Begin
+    CurrentPointer := PointerJournal^.Next;
+    PointerJournal^.Next := CurrentPointer^.Next;
+    If PointerJournal^.Next = nil then
+        TailJournal := PointerJournal;
+    CurrentPointer^.Next := nil;
+    Dispose(CurrentPointer);
+End;
+
+
+Procedure DeleteJournalStringGrid(Var StringGridJournal: TStringGrid);
+Var
+    I, J: Integer;
+Begin
+    For I := StringGridJournal.Row to StringGridJournal.RowCount - 1 do
+    Begin
+        For J := 0 to 5 do
+            StringGridJournal.Cells[J,I] := StringGridJournal.Cells[J,I + 1];
+    End;
+    StringGridJournal.RowCount := StringGridJournal.RowCount - 1;
+End;
+
+
+// удаление элемента структуры "журнал"
+Procedure DeleteJournalElement(StringGridJournalRowIndex: Integer);
+Var
+    CurrentPointer: PJournal;
+    I: Integer;
+Begin
+    If FormMain.StringGridJournal.Row <> 0 then
+    Begin
+        If MessageBox(Application.Handle,'Вы действительно хотите удалить данную операцию?','Внимание',MB_YESNO+MB_ICONWARNING) = IDYES then
+        Begin
+            DataHasChanged := True;
+            PointerJournal := HeadJournal;
+
+            While PointerJournal^.Next^.ID <> StrToInt(FormMain.StringGridJournal.Cells[0, StringGridJournalRowIndex]) do
+                PointerJournal := PointerJournal^.Next;
+
+            FindLineInAccountList(PointerJournal^.Next^.Account, PointerJournal^.Next^.Amount * (-1), True);
+            DeleteCurrentOneJournalElement(PointerJournal);
+
+            HeadJournal^.ID := HeadJournal^.ID - 1;
+
+            FillAccount(FormMain.StringGridAccounts);
+            DeleteJournalStringGrid(FormMain.StringGridJournal);
+
+            ResetTabReportsObjects();
+        End;
+    End;
+End;
+
+
+
+
+Procedure DeleteCurrentOneAccountElement(Var PointerAccount: PAccount);
+Var
+    CurrentPointer: PAccount;
+Begin
+    CurrentPointer := PointerAccount^.Next;
+    PointerAccount^.Next := CurrentPointer^.Next;
+    If PointerAccount^.Next = nil then
+        TailAccount := PointerAccount;
+    CurrentPointer^.Next := nil;
+    Dispose(CurrentPointer);
+End;
+
+
+Procedure SetFocusCellStringGrid(Var StringGridAccounts: TStringGrid);
+Begin
+    With StringGridAccounts do
+    Begin
+        If RowCount <> 1 then
+        Begin
+            Row := 1;
+            Col := 1;
+            Col := 0;
+        End;
+    End;
+End;
+
+
+// удаление элемента структуры "счета"
+Procedure DeleteAccountElement(StringGridAccountsRowIndex: Integer);
+Var
+    CurrentPointer: PAccount;
+    I: Integer;
+Begin
+    If FormMain.StringGridAccounts.Row <> 0 then
+    Begin
+        If MessageBox(Application.Handle,'Вы действительно хотите безвозвратно удалить данный счёт?','Внимание',MB_YESNO+MB_ICONWARNING) = IDYES then
+        Begin
+            DataHasChanged := True;
+            PointerAccount := HeadAccount;
+
+            While PointerAccount^.Next^.ID <> StrToInt(FormMain.StringGridAccounts.Cells[0, StringGridAccountsRowIndex]) do
+                PointerAccount := PointerAccount^.Next;
+
+            DeleteCurrentOneAccountElement(PointerAccount);
+
+            HeadAccount^.ID := HeadAccount^.ID - 1;
+
+            FillAccount(FormMain.StringGridAccounts);
+            SetFocusCellStringGrid(FormMain.StringGridAccounts);
+
+            ResetTabReportsObjects();
+        End;
+    End;
+End;
+
+
+
+
+// проверка вводимого вещественного числа в поле "Сумма"
+Function CheckKeyEditMoney(Line: String; CursorPos: Integer; SelLength: Integer; Key: Char): Char;
+Var
+    Len, I: Integer;
+    IsCorrect: Boolean;
+    PosPoint: Integer;
+Begin
+    Len := Length(Line);
+
+    If Key in ['0'..'9', ',', #8] then
+    Begin
+        // Проверка на ввод 00, 0n
+        If ((Line = '0') and (CursorPos = 1)) and (Not (Key In [',', #8])) then
+            Key := #0;
+
+        // Проверка на вставку 0 в начало строки перед числом n: 0n
+        If Len <> 0 then
+            If ((CursorPos = 0) and (Key = '0') and Not (Line[1] in [','])) then
+                Key := #0;
+
+        // Проверка на вставку символа между 0 и запятой: 01,2
+        If Len >= 2 then
+            If (CursorPos = 1) and (Key <> #8) and (Copy(Line, 1, 2) = '0,') then
+                Key := #0;
+
+        PosPoint := FindPosPoint(Line);
+
+        // Проверка повторного ввода запятой
+        If ((Key = ',') and (PosPoint <> 0)) then
+            Key := #0;
+
+        If Key <> #8 then
+            If Not (CheckLengthAfterPoint((Line + Key), PosPoint)) or Not(CheckLengthBeforePoint((Line + Key), PosPoint, Key)) then
+                Key := #0;
+    End
+    Else
+        Key := #0;
+
+    CheckKeyEditMoney := Key;
+End;
+
+End.

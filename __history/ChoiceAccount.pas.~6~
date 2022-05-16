@@ -1,0 +1,65 @@
+Unit ChoiceAccount;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids;
+
+Type
+    TFormChoiceAccount = class(TForm)
+        StringGridAccount: TStringGrid;
+        ButtonExecute: TButton;
+    procedure FormShow(Sender: TObject);
+    procedure ButtonExecuteClick(Sender: TObject);
+    procedure StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormChoiceAccount: TFormChoiceAccount;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, ExpenseJournal, IncomeJournal, Journal;
+
+
+
+Procedure TFormChoiceAccount.FormShow(Sender: TObject);
+Begin
+    SetStartCreateAccount(StringGridAccount);
+    FillCreateAccount(StringGridAccount);
+End;
+
+
+Procedure TFormChoiceAccount.ButtonExecuteClick(Sender: TObject);
+Begin
+    If StringGridAccount.Row <> 0 then
+        Close();
+End;
+
+
+Procedure TFormChoiceAccount.StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    FillColorInGrid(StringGridAccount, ACol, ARow, Rect, State);
+    FillColorChoiceRecord(StringGridAccount, ACol, ARow, Rect, State);
+End;
+
+
+Procedure TFormChoiceAccount.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    If IncomeOrExpense then
+        PushResultsInComboBox(StringGridAccount, TempComboAccount, FormIncomeJournal.ComboBoxAccount)
+    Else
+        PushResultsInComboBox(StringGridAccount, TempComboAccount, FormExpenseJournal.ComboBoxAccount)
+End;
+
+End.

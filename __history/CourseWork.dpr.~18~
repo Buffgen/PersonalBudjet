@@ -1,0 +1,39 @@
+program CourseWork;
+
+uses
+  Vcl.Forms,
+  Main in 'Main.pas' {FormMain},
+  Category in 'Category.pas' {FormCategory},
+  Journal in 'Journal.pas' {FormJournal},
+  UnitProcedure in 'UnitProcedure.pas',
+  CreateAccount in 'CreateAccount.pas' {FormCreateAccount},
+  CreateCategory in 'CreateCategory.pas' {FormCreateCategory},
+  CreateRecordJournal in 'CreateRecordJournal.pas' {FormCreateRecordJournal},
+  ChoiceAccount in 'ChoiceAccount.pas' {FormChoiceAccount},
+  ChoiceCategory in 'ChoiceCategory.pas' {FormChoiceCategory},
+  FilterJournal in 'FilterJournal.pas' {FormFilterJournal},
+  UnitFilterProcedure in 'UnitFilterProcedure.pas',
+  Vcl.Themes,
+  Vcl.Styles,
+  About in 'About.pas' {FormAbout},
+  EditCategory in 'EditCategory.pas' {Form1};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  TStyleManager.TrySetStyle('Sky');
+  Application.CreateForm(TFormMain, FormMain);
+  Application.CreateForm(TFormCategory, FormCategory);
+  Application.CreateForm(TFormJournal, FormJournal);
+  Application.CreateForm(TFormCreateAccount, FormCreateAccount);
+  Application.CreateForm(TFormCreateCategory, FormCreateCategory);
+  Application.CreateForm(TFormCreateRecordJournal, FormCreateRecordJournal);
+  Application.CreateForm(TFormChoiceAccount, FormChoiceAccount);
+  Application.CreateForm(TFormChoiceCategory, FormChoiceCategory);
+  Application.CreateForm(TFormFilterJournal, FormFilterJournal);
+  Application.CreateForm(TFormAbout, FormAbout);
+  Application.CreateForm(TForm1, Form1);
+  Application.Run;
+end.

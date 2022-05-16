@@ -1,0 +1,73 @@
+Unit Account;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Grids, CreateAccount, DeleteAccount;
+
+Type
+    TFormAccount = class(TForm)
+        StringGridAccount: TStringGrid;
+        ButtonCreate: TButton;
+        ButtonDelete: TButton;
+    Button1: TButton;
+
+    Procedure FormShow(Sender: TObject);
+//    Procedure ComboBoxParametersChange(Sender: TObject);
+//    Procedure ComboBoxParametersKeyPress(Sender: TObject; var Key: Char);
+//    Procedure ComboBoxParametersClick(Sender: TObject);
+//    Procedure StringGridAccountSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+//    Procedure ButtonExecuteClick(Sender: TObject);
+//    Procedure EditIndexChange(Sender: TObject);
+//    Procedure EditNumberChange(Sender: TObject);
+//    Procedure EditBalanceChange(Sender: TObject);
+//    Procedure EditIndexKeyPress(Sender: TObject; var Key: Char);
+//    Procedure EditBalanceKeyPress(Sender: TObject; var Key: Char);
+    Procedure ButtonCreateClick(Sender: TObject);
+    Procedure ButtonDeleteClick(Sender: TObject);
+    Procedure StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormAccount: TFormAccount;
+
+Implementation
+    {$R *.dfm}
+    
+Uses
+    Main, UnitProcedure;
+
+
+Procedure TFormAccount.FormShow(Sender: TObject);
+Begin
+    SetStartAccount(StringGridAccount);
+    FillAccount(StringGridAccount);
+End;
+
+
+Procedure TFormAccount.ButtonCreateClick(Sender: TObject);
+Begin
+    FormCreateAccount.Show;
+End;
+
+
+Procedure TFormAccount.ButtonDeleteClick(Sender: TObject);
+Begin
+    FormDeleteAccount.Show;
+End;
+
+
+Procedure TFormAccount.StringGridAccountDrawCell(Sender: TObject; ACol,ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    FillColorInGrid(StringGridAccount, ACol, ARow, Rect, State);
+    FillColorChoiceRecord(StringGridAccount, ACol, ARow, Rect, State);
+End;
+
+
+End.

@@ -1,0 +1,56 @@
+Unit ChoiceCategory;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+    Vcl.StdCtrls, Vcl.Grids, Vcl.Buttons, Vcl.ExtCtrls;
+
+Type
+    TFormChoiceCategory = class(TForm)
+    StringGridCategoryList: TStringGrid;
+    ButtonApply: TSpeedButton;
+    PanelSetAccount: TPanel;
+
+    Procedure FormShow(Sender: TObject);
+    Procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    Procedure ButtonApplyClick(Sender: TObject);
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormChoiceCategory: TFormChoiceCategory;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, ExpenseJournal, CreateRecordJournal, Journal;
+
+
+
+Procedure TFormChoiceCategory.FormShow(Sender: TObject);
+Begin
+    SetStartCategory(StringGridCategoryList);
+    FillCategory(StringGridCategoryList);
+End;
+
+
+procedure TFormChoiceCategory.ButtonApplyClick(Sender: TObject);
+Begin
+    If StringGridCategoryList.Row <> 0 then
+        Close();
+End;
+
+
+Procedure TFormChoiceCategory.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    PushResultsInComboBox(StringGridCategoryList, TempComboCategory, FormCreateRecordJournal.ComboBoxCategory)
+End;
+
+End.

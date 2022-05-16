@@ -1,0 +1,62 @@
+object FormJournal: TFormJournal
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = #1046#1091#1088#1085#1072#1083
+  ClientHeight = 661
+  ClientWidth = 711
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object ButtonFilter: TButton
+    Left = 472
+    Top = 64
+    Width = 121
+    Height = 28
+    Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1072' '#1092#1080#1083#1100#1090#1088#1086#1074
+    TabOrder = 0
+    OnClick = ButtonFilterClick
+  end
+  object ButtonGraphic: TButton
+    Left = 472
+    Top = 16
+    Width = 121
+    Height = 25
+    Caption = #1044#1072#1085#1085#1099#1077' '#1075#1088#1072#1092#1080#1082#1072
+    TabOrder = 1
+    OnClick = ButtonGraphicClick
+  end
+  object StringGridTemp: TStringGrid
+    Left = 8
+    Top = 8
+    Width = 409
+    Height = 233
+    ColCount = 6
+    FixedCols = 0
+    RowCount = 1
+    FixedRows = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goFixedRowDefAlign]
+    TabOrder = 2
+  end
+  object StringGridChartAcoountsTemp: TStringGrid
+    Left = 8
+    Top = 304
+    Width = 409
+    Height = 225
+    ColCount = 6
+    FixedCols = 0
+    RowCount = 1
+    FixedRows = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSizing, goColSizing, goRowSelect, goFixedRowDefAlign]
+    TabOrder = 3
+  end
+end

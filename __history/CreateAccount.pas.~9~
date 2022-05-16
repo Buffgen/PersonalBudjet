@@ -1,0 +1,121 @@
+Unit CreateAccount;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids;
+
+Type
+    TFormCreateAccount = class(TForm)
+        LabelIndex: TLabel;
+        LabelNumber: TLabel;
+        EditIndex: TEdit;
+        EditNumber: TEdit;
+        StringGridAccount: TStringGrid;
+    ButtonExecute: TButton;
+    LabelWarningNumber: TLabel;
+
+
+    Procedure ButtonExecuteClick(Sender: TObject);
+    Procedure FormShow(Sender: TObject);
+    Procedure StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    Procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure EditNumberChange(Sender: TObject);
+
+
+    Private
+        Procedure AddNewAccountElement();
+        Procedure AddNewAccountStringGrid();
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormCreateAccount: TFormCreateAccount;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, Account;
+
+
+
+Procedure TFormCreateAccount.FormShow(Sender: TObject);
+Begin
+    EditNumber.Clear;
+    EditIndex.Clear;
+    EditIndex.Text := IntToStr(HeadAccount^.ID + 1);
+    SetStartCreateOrDeleteAccount(StringGridAccount);
+    FillCreateOrDeleteAccount(StringGridAccount);
+End;
+
+
+Procedure TFormCreateAccount.AddNewAccountElement();
+Begin
+    DataHasChanged := True;
+    Inc(MaxAccountID);
+    PointerAccount := TailAccount;
+    New(PointerAccount^.Next);
+    PointerAccount := PointerAccount^.Next;
+    PointerAccount^.Next := Nil;
+    PointerAccount^.ID := MaxAccountID;
+    PointerAccount^.Name := EditNumber.Text;
+    PointerAccount^.Balance := 0;
+    TailAccount := PointerAccount;
+    HeadAccount^.ID := HeadAccount^.ID + 1;
+End;
+
+
+Procedure TFormCreateAccount.AddNewAccountStringGrid();
+Begin
+    StringGridAccount.RowCount :=  StringGridAccount.RowCount + 1;
+    StringGridAccount.Cells[0 ,StringGridAccount.RowCount - 1] := IntToStr(StringGridAccount.RowCount - 1);
+    StringGridAccount.Cells[1 ,StringGridAccount.RowCount - 1] := PointerAccount^.Name;
+End;
+
+
+Procedure TFormCreateAccount.ButtonExecuteClick(Sender: TObject);
+Begin
+    AddNewAccountElement();
+    AddNewAccountStringGrid();
+    EditNumber.Clear;
+    EditIndex.Text := IntToStr(HeadAccount^.ID + 1);
+End;
+
+
+Procedure TFormCreateAccount.EditNumberChange(Sender: TObject);
+Begin
+    If (FindIndexStringGrid(StringGridAccount, EditNumber, 1) = -1) and (EditNumber.Text <> '') then
+    Begin
+        ButtonExecute.Enabled := True;
+        LabelWarningNumber.Visible := False;
+    End
+    Else If EditNumber.Text = '' then
+    Begin
+        ButtonExecute.Enabled := False;
+        LabelWarningNumber.Visible := False;
+    End
+    Else
+    Begin
+        ButtonExecute.Enabled := False;
+        LabelWarningNumber.Visible := True;
+    End;
+End;
+
+
+Procedure TFormCreateAccount.StringGridAccountDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    FillColorInGrid(StringGridAccount, ACol, ARow, Rect, State);
+End;
+
+
+Procedure TFormCreateAccount.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    EditNumber.Clear;
+    EditIndex.Clear;
+    FillAccount(FormAccount.StringGridAccount);
+End;
+
+End.

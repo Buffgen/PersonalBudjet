@@ -1,0 +1,99 @@
+object FormJournal: TFormJournal
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = #1046#1091#1088#1085#1072#1083
+  ClientHeight = 661
+  ClientWidth = 1063
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object ButtonOperationIncome: TButton
+    Left = 16
+    Top = 48
+    Width = 121
+    Height = 41
+    Caption = #1055#1086#1087#1086#1083#1085#1080#1090#1100' '#1073#1072#1083#1072#1085#1089
+    TabOrder = 0
+    OnClick = ButtonOperationIncomeClick
+  end
+  object ButtonOperationDelete: TButton
+    Left = 16
+    Top = 168
+    Width = 121
+    Height = 41
+    Caption = #1059#1076#1072#1083#1080#1090#1100' '#1086#1087#1077#1088#1072#1094#1080#1102
+    TabOrder = 1
+    OnClick = ButtonOperationDeleteClick
+  end
+  object StringGridJournal: TStringGrid
+    Left = 168
+    Top = 24
+    Width = 860
+    Height = 369
+    ColCount = 6
+    FixedCols = 0
+    RowCount = 1
+    FixedRows = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect, goFixedRowDefAlign]
+    TabOrder = 2
+    OnDrawCell = StringGridJournalDrawCell
+  end
+  object ButtonOperationExpense: TButton
+    Left = 16
+    Top = 103
+    Width = 121
+    Height = 41
+    Caption = #1042#1085#1077#1089#1090#1080' '#1088#1072#1089#1093#1086#1076
+    TabOrder = 3
+    OnClick = ButtonOperationExpenseClick
+  end
+  object Button1: TButton
+    Left = 16
+    Top = 232
+    Width = 137
+    Height = 41
+    Caption = #1059#1076#1072#1083#1080#1090#1100' '#1086#1087#1077#1088#1072#1094#1080#1102' (new)'
+    TabOrder = 4
+    OnClick = Button1Click
+  end
+  object ButtonFilter: TButton
+    Left = 168
+    Top = 399
+    Width = 121
+    Height = 25
+    Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1072' '#1092#1080#1083#1100#1090#1088#1086#1074
+    TabOrder = 5
+    OnClick = ButtonFilterClick
+  end
+  object ButtonGraphic: TButton
+    Left = 888
+    Top = 504
+    Width = 121
+    Height = 25
+    Caption = #1044#1072#1085#1085#1099#1077' '#1075#1088#1072#1092#1080#1082#1072
+    TabOrder = 6
+    OnClick = ButtonGraphicClick
+  end
+  object StringGridTemp: TStringGrid
+    Left = 8
+    Top = 439
+    Width = 860
+    Height = 201
+    ColCount = 6
+    FixedCols = 0
+    RowCount = 1
+    FixedRows = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect, goFixedRowDefAlign]
+    TabOrder = 7
+  end
+end

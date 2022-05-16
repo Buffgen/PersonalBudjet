@@ -1,0 +1,1003 @@
+Unit Main;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+    Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.Grids, VclTee.TeeGDIPlus,
+    VCLTee.TeEngine, VCLTee.Series, VCLTee.TeeProcs, VCLTee.Chart, Vcl.Buttons,
+    Vcl.ToolWin, Vcl.Menus, StrUtils, System.Math, System.ImageList, Vcl.ImgList,
+    VCL.Themes, IniFiles, DateUtils,
+    Account, CreateAccount, DeleteAccount, Category, ChoiceAccount,
+    ChoiceCategory, DeleteJournal, CreateRecordJournal, FilterJournal,
+    About;
+
+Type                                           //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    TStringMatrix = Array of Array of String;
+    TStringArr = Array of String;
+                                               //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    PJournal = ^TJournal;
+    TJournal = Record
+        ID: Integer;
+        Account: String;
+        Category: String;
+        Amount: Double;
+        Date: TDate;
+        Comment: String;
+        Next: PJournal;
+    End;
+
+    PAccount = ^TAccount;
+    TAccount = Record
+        ID: Integer;
+        Name: String;
+        Balance: Double;
+        Next: PAccount;
+    End;
+
+    PMainCategory = ^TMainCategory;
+    TMainCategory = Record
+        ID: Integer;
+        Name: String;
+        Next: PMainCategory;
+    End;
+
+
+    TFormMain = class(TForm)
+    PanelButtonsGroup: TPanel;
+    Panel_Main: TPanel;
+    StatusBarMain: TStatusBar;
+    ButtonAccounts: TSpeedButton;
+    ButtonChart: TSpeedButton;
+    ButtonJournal: TSpeedButton;
+    ButtonCategories: TSpeedButton;
+    ButtonAdd: TSpeedButton;
+    ButtonDel: TSpeedButton;
+    ButtonFilter: TSpeedButton;
+    PanelButtonLeft: TPanel;
+    PanelButtonCenter: TPanel;
+    SplitterButtonLeft: TSplitter;
+    MainMenu: TMainMenu;
+    MenuFile: TMenuItem;
+    MenuView: TMenuItem;
+    MenuTools: TMenuItem;
+    MenuHelp: TMenuItem;
+    MenuFileSave: TMenuItem;
+    MenuFileSeparator: TMenuItem;
+    MenuFileExit: TMenuItem;
+    MenuViewAccounts: TMenuItem;
+    MenuViewJournal: TMenuItem;
+    MenuViewReports: TMenuItem;
+    MenuViewCategories: TMenuItem;
+    MenuToolsFilter: TMenuItem;
+    MenuToolsAddRecord: TMenuItem;
+    MenuToolsDelRecord: TMenuItem;
+    MenuHelpManual: TMenuItem;
+    MenuHelpAbout: TMenuItem;
+    ButtonCloseProgramm: TSpeedButton;
+    Splitter1: TSplitter;
+    N1: TMenuItem;
+    MenuToolsSettings: TMenuItem;
+    PageControlMain: TPageControl;
+    TabAccounts: TTabSheet;
+    SplitterPanelsTabAccounts: TSplitter;
+    PanelTabAccountsGrids: TPanel;
+    PanelTabAccountsGridGroupTop: TPanel;
+    PanelTabAccountsGridGroupTopLabel: TPanel;
+    LabelAccountsList: TLabel;
+    PanelTabAccountsGridGroupTopGrid: TPanel;
+    StringGridAccounts: TStringGrid;
+    PanelTabAccountsGridsGroupLastAction: TPanel;
+    SplitterPanelsTabAccountsGroups: TSplitter;
+    PanelTabAccountsGridsGroupLastActionLabel: TPanel;
+    LabelLastAccountAction: TLabel;
+    PanelTabAccountsGridsGroupLastActionGrid: TPanel;
+    StringGridLastAccountAction: TStringGrid;
+    PanelTabAccountsCharts: TPanel;
+    PanelTabAccountsChartsLabel: TPanel;
+    LabelChart: TLabel;
+    PanelTabAccountsChartsChart: TPanel;
+    ChartTabAccounts: TChart;
+    Series2: TAreaSeries;
+    Series1: TAreaSeries;
+    TabJournal: TTabSheet;
+    StringGridJournal: TStringGrid;
+    TabReports: TTabSheet;
+    PanelTabReportsOptions: TPanel;
+    ButtonNextYear: TSpeedButton;
+    ButtonPrevYear: TSpeedButton;
+    ComboBoxTabReportsAccount: TComboBox;
+    ComboBoxTabReportsMonth: TComboBox;
+    PanelTabReportYear: TPanel;
+    PanelTabReportsCharts: TPanel;
+    SplitterTabReportsCharts: TSplitter;
+    PanelTabReportsChartsTop: TPanel;
+    ChartTabReportsTop: TChart;
+    Series3: THorizBarSeries;
+    PanelTabReportsChartsBottom: TPanel;
+    ChartTabReportsBottom: TChart;
+    HorizBarSeries1: THorizBarSeries;
+    ImageList: TImageList;
+
+    Procedure ButtonExitClick(Sender: TObject);
+    Procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    Procedure FormCreate(Sender: TObject);
+    Procedure ButtonSaveClick(Sender: TObject);
+    Procedure FormShow(Sender: TObject);
+    Procedure StringGridLastAccountActionDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    Procedure StringGridLastAccountActionClick(Sender: TObject);
+    Procedure ButtonAccountsClick(Sender: TObject);
+    Procedure ButtonJournalClick(Sender: TObject);
+    Procedure ButtonChartClick(Sender: TObject);
+    Procedure ButtonCategoriesClick(Sender: TObject);
+    Procedure ButtonAddClick(Sender: TObject);
+    Procedure ButtonDelClick(Sender: TObject);
+    Procedure PageControlMainChange(Sender: TObject);
+    Procedure StringGridAccountsSelectCell(Sender: TObject; ACol, ARow: Integer;
+      var CanSelect: Boolean);
+    Procedure ButtonFilterClick(Sender: TObject);
+    Procedure ButtonCloseProgrammClick(Sender: TObject);
+    Procedure ComboBoxTabReportsAccountDropDown(Sender: TObject);
+    Procedure ComboBoxTabReportsAccountChange(Sender: TObject);
+    Procedure ComboBoxTabReportsMonthChange(Sender: TObject);
+    Procedure ButtonPrevYearClick(Sender: TObject);
+    Procedure ButtonNextYearClick(Sender: TObject);
+    Procedure MenuFileSaveClick(Sender: TObject);
+    Procedure MenuFileExitClick(Sender: TObject);
+    Procedure MenuViewAccountsClick(Sender: TObject);
+    Procedure MenuViewJournalClick(Sender: TObject);
+    Procedure MenuViewReportsClick(Sender: TObject);
+    Procedure MenuViewCategoriesClick(Sender: TObject);
+    Procedure MenuToolsFilterClick(Sender: TObject);
+    Procedure MenuToolsAddRecordClick(Sender: TObject);
+    Procedure MenuToolsDelRecordClick(Sender: TObject);
+    Procedure MenuHelpAboutClick(Sender: TObject);
+    Procedure LoadUIStyle();
+    procedure MenuToolsSettingsClick(Sender: TObject);
+
+
+    Private
+        Procedure ReadingFiles();
+        Procedure LoadChartDataOnStart();
+        Procedure SetButtonsPageAccount();
+        Procedure SetButtonsPageJournal();
+        Procedure SetButtonsPageChart();
+    Public
+
+    End;
+
+Const
+    PathAccount = 'DataAccount.txt';
+    PathCategory = 'DataCategory.txt';
+    PathJournal = 'DataJournal.txt';
+    AccountsColAccount = 1;
+    JournalColAccount = 2;
+
+
+Var
+    FormMain: TFormMain;
+    DataHasChanged: Boolean;
+
+    PointerJournal: PJournal;
+    PointerAccount: PAccount;
+    PointerCategory: PMainCategory;
+
+    HeadJournal: PJournal;
+    HeadAccount: PAccount;
+    HeadCategory: PMainCategory;
+
+    TailJournal: PJournal;
+    TailAccount: PAccount;
+    TailCategory: PMainCategory;
+
+    MaxAccountID: Integer;
+    MaxCategoryID: Integer;
+    MaxJournalID: Integer;
+    //LastMainCategory: Integer;
+    YearNow: String;
+    MonthNow: Word;
+    IniFile: TIniFile;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    UnitProcedure, UnitFilterProcedure, Journal, Settings;
+
+
+
+Procedure TFormMain.LoadUIStyle();
+Var
+  StyleManager: TStyleManager;
+  StyleName: String;
+Begin
+    StyleManager := TStyleManager.Create;
+    //Загрузка настроек из INI
+    IniFile := TIniFile.Create(ExtractFilePath(ParamStr(0))+'Settings.ini');
+    Try
+        StyleName := '';
+        Try
+            StyleName := IniFile.ReadString('Settings','Skin', 'Windows');
+        Finally
+            IniFile.Free;
+        End;
+    Except
+        StyleName := 'Windows';
+    End;
+
+    StyleManager.TrySetStyle(StyleName, False);
+
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.FormCreate(Sender: TObject);
+Begin
+    LoadUIStyle();
+
+    DataHasChanged := False;
+
+    New(HeadJournal);
+    New(HeadAccount);
+    New(HeadCategory);
+
+    PointerJournal := HeadJournal;
+    PointerAccount := HeadAccount;
+    PointerCategory := HeadCategory;
+
+    HeadJournal^.ID := 0;
+    HeadAccount^.ID := 0;
+    HeadCategory^.ID := 2;
+
+    New(HeadCategory^.Next);
+    HeadCategory^.Next^.ID := 1;
+    HeadCategory^.Next^.Name := 'Пополнение';
+
+    New(HeadCategory^.Next^.Next);
+    HeadCategory^.Next^.Next^.ID := 2;
+    HeadCategory^.Next^.Next^.Name := 'Другое';
+
+    MaxAccountID := 0;
+    MaxCategoryID := 2;
+    MaxJournalID := 0;
+
+    HeadJournal^.Next := Nil;
+    HeadAccount^.Next := Nil;
+    HeadCategory^.Next^.Next^.Next := Nil;
+
+    TailJournal := HeadJournal;
+    TailAccount := HeadAccount;
+    TailCategory := HeadCategory^.Next^.Next;
+
+    ReadingFiles();
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.FormShow(Sender: TObject);
+Begin
+    StatusBarMain.Panels[0].Text := DateToStr(Now);
+    StatusBarMain.Panels[1].Text := ParamStr(0);
+    LabelAccountsList.StyleElements := LabelAccountsList.StyleElements - [seFont];
+    LabelAccountsList.Font.Color := clTeal;
+    LabelLastAccountAction.StyleElements := LabelLastAccountAction.StyleElements - [seFont];
+    LabelLastAccountAction.Font.Color := clTeal;
+    LabelChart.StyleElements := LabelChart.StyleElements - [seFont];
+    LabelChart.Font.Color := clTeal;
+    SetStartJournal(StringGridJournal);
+    FillJournal(StringGridJournal);
+    PageControlMain.ActivePage := TabAccounts;
+    ButtonFilter.Enabled := False;
+    SetStartAccount(StringGridAccounts);
+    FillAccount(StringGridAccounts);
+    SetStartLastAccountAction(StringGridLastAccountAction);
+    YearNow := Variant(YearOf(now));
+    MonthNow := MonthOf(Now);
+    PanelTabReportYear.Caption := YearNow;
+    ButtonNextYear.Enabled := False;
+    ComboBoxTabReportsMonth.ItemIndex := MonthNow - 1;
+    MenuToolsFilter.Enabled := False;
+    LoadChartDataOnStart();
+End;
+
+
+Procedure TFormMain.SetButtonsPageAccount();
+Begin
+    ButtonAdd.Enabled := True;
+    ButtonDel.Enabled := True;
+    ButtonFilter.Enabled := False;
+    MenuToolsAddRecord.Enabled := True;
+    MenuToolsDelRecord.Enabled := True;
+    MenuToolsFilter.Enabled := False;
+End;
+
+
+Procedure TFormMain.SetButtonsPageJournal();
+Begin
+    ButtonAdd.Enabled := True;
+    ButtonDel.Enabled := True;
+    ButtonFilter.Enabled := True;
+    MenuToolsAddRecord.Enabled := True;
+    MenuToolsDelRecord.Enabled := True;
+    MenuToolsFilter.Enabled := True;
+End;
+
+
+Procedure TFormMain.SetButtonsPageChart();
+Begin
+    ButtonAdd.Enabled := False;
+    ButtonDel.Enabled := False;
+    ButtonFilter.Enabled := False;
+    MenuToolsFilter.Enabled := False;
+    MenuToolsAddRecord.Enabled := False;
+    MenuToolsDelRecord.Enabled := False;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.PageControlMainChange(Sender: TObject);
+Begin
+    If PageControlMain.TabIndex = 0 then
+        SetButtonsPageAccount()
+    Else If PageControlMain.TabIndex = 1 then
+        SetButtonsPageJournal()
+    Else If PageControlMain.TabIndex = 2 then
+        SetButtonsPageChart();
+End;
+
+
+//------------------------------------------------------------------------------
+Function CheckFile(PathAccount, PathJournal, PathCategory: String): Boolean;
+Var
+    DataFile: TextFile;
+    IsCorrect: Boolean;
+    OldName, NewName: String;
+    I: Integer;
+    DataFiles: Array of String;
+Begin
+    IsCorrect := True;
+    SetLength(DataFiles, 3);
+    DataFiles[0] := PathAccount;
+    DataFiles[1] := PathJournal;
+    DataFiles[2] := PathCategory;
+
+    If (Not FileExists(PathAccount)) or (Not FileExists(PathJournal)) or Not FileExists(PathCategory) then
+    Begin
+        If (MessageBox(Application.Handle,
+                      'Не найден файл данных!' +#13#10+
+                      'Нажмите клавишу "ОК" для создания нового файла данных.' +#13#10+
+                      'Для завершения работы программы без создания нового файла данных, нажмите клавишу "Нет".',
+                      'Внимание', MB_YESNO+MB_ICONQUESTION)) = IDNO then
+        Begin
+            IsCorrect := False;
+        End
+        Else
+        Begin
+            For I := 0 to High(DataFiles) do
+            Begin
+                OldName := DataFiles[I];
+                NewName := ChangeFileExt(OldName, '.bkp');
+                IsCorrect := RenameFile(OldName, NewName);
+            End;
+
+            For I := 0 to High(DataFiles) do
+            Begin
+                try
+                    AssignFile(DataFile, DataFiles[I]);
+                    Rewrite(DataFile);
+                    CloseFile(DataFile);
+                    IsCorrect := True;
+                except
+                on E : Exception do
+                    Begin
+                        ShowMessage('Во время создания файла данных произошла ошибка. '+ #13#10 +
+                                     E.ClassName+': '+E.Message + #13#10 +
+                                     'Программа завершит работу!');
+                        Application.Terminate;
+                    End;
+                end;
+            End;
+        End;
+    End;
+    CheckFile := IsCorrect;
+End;
+
+
+
+//------------------------------------------------------------------------------
+Function ScanLine(Line: String; Counter: Integer): TStringArr;
+Var
+    I, PosDelimiter: Integer;
+    ArrString: TStringArr;
+Begin
+    Setlength(ArrString, Counter);
+    For I := 0 to Counter - 1 do
+    Begin
+        PosDelimiter := Pos('|||', Line);
+        If PosDelimiter <> 0 then
+        Begin
+            ArrString[I] := Copy(Line, 1, PosDelimiter - 1);
+            Line := Copy(Line, PosDelimiter + 3, Length(Line));
+        End
+        Else
+            ArrString[I] := Copy(Line, 1, Length(Line));
+    End;
+    ScanLine := ArrString;
+End;
+
+
+
+//------------------------------------------------------------------------------
+Procedure ReadAccountLine(Line: String);
+Var
+    ArrString: TStringArr;
+Begin
+    PointerAccount := TailAccount;
+    New(PointerAccount^.Next);
+    TailAccount := PointerAccount^.Next;
+    HeadAccount^.ID := HeadAccount^.ID + 1;
+    SetLength(ArrString, 3);
+    ArrString := ScanLine(Line, 3);
+
+    TailAccount^.ID := StrToInt(ArrString[0]);
+    If StrToInt(ArrString[0]) > MaxAccountID then
+        MaxAccountID := StrToInt(ArrString[0]);
+
+    TailAccount^.Name := AnsiUpperCase(ArrString[1]);
+    TailAccount^.Balance := SimpleRoundTo(StrToFloat(ArrString[2]), -2);
+    TailAccount^.Next := Nil;
+End;
+
+
+
+//------------------------------------------------------------------------------
+Procedure ReadCategoryLine(Line: String);
+Var
+    ArrString: TStringArr;
+Begin
+    PointerCategory := TailCategory;
+    New(PointerCategory^.Next);
+    TailCategory := PointerCategory^.Next;
+    HeadCategory^.ID := HeadCategory^.ID + 1;
+    ArrString := ScanLine(Line, 2);
+
+    TailCategory^.ID := StrToInt(ArrString[0]);
+    If StrToInt(ArrString[0]) > MaxCategoryID then
+        MaxCategoryID := StrToInt(ArrString[0]);
+
+    TailCategory^.Name := AnsiLowerCase(ArrString[1]);
+    TailCategory^.Name := StringReplace(TailCategory^.Name, TailCategory^.Name[1], AnsiUpperCase(TailCategory^.Name[1]), []);
+    TailCategory^.Next := Nil;
+End;
+
+
+
+//------------------------------------------------------------------------------
+Procedure ReadJournalLine(Line: String);
+Var
+    ArrString: TStringArr;
+Begin
+    PointerJournal := TailJournal;
+    New(PointerJournal^.Next);
+    TailJournal := PointerJournal^.Next;
+    HeadJournal^.ID := HeadJournal^.ID + 1;
+    ArrString := ScanLine(Line, 7);
+
+    TailJournal^.ID := StrToInt(ArrString[0]);
+    If StrToInt(ArrString[0]) > MaxJournalID then
+        MaxJournalID := StrToInt(ArrString[0]);
+
+    TailJournal^.Account := AnsiUpperCase(ArrString[1]);
+    TailJournal^.Category := AnsiLowerCase(ArrString[2]);
+    TailJournal^.Category := StringReplace(TailJournal^.Category,
+                                           TailJournal^.Category[1],
+                                           AnsiUpperCase(TailJournal^.Category[1]),
+                                           []);
+    TailJournal^.Amount := SimpleRoundTo(StrToFloat(ArrString[3]), -2);
+    TailJournal^.Date := StrToDate(ArrString[4]);
+    TailJournal^.Comment := ArrString[5];
+    TailJournal^.Next := Nil;
+End;
+
+
+Procedure ChoiceReadLine(Path: String; Line: String);
+Begin
+    If Line <> '' then
+    Begin
+        Case AnsiIndexStr(Path,[PathAccount, PathCategory, PathJournal]) of
+            0: ReadAccountLine(Line);
+            1: ReadCategoryLine(Line);
+            2: ReadJournalLine(Line);
+        End;
+    End;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure ReadDefiniteFile(Path: String);
+Var
+    DataFile: TextFile;
+    Line: String;
+Begin
+    AssignFile(DataFile, Path);
+    Reset(DataFile);
+    While Not Eof(DataFile) do
+    Begin
+        Readln(DataFile, Line);
+        ChoiceReadLine(Path, Line);
+    End;
+    CloseFile(DataFile);
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ReadingFiles();
+Var
+    I: Integer;
+Begin
+    If Not CheckFile(PathAccount, PathJournal, PathCategory) then
+        Application.Terminate
+    Else
+    Begin
+        ReadDefiniteFile(PathAccount);
+        ReadDefiniteFile(PathCategory);
+        ReadDefiniteFile(PathJournal);
+    End;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure SaveJournalFile();
+Var
+    DataFile: TextFile;
+    Line: String;
+Begin
+    AssignFile(DataFile, PathJournal);
+    Rewrite(DataFile);
+    PointerJournal := HeadJournal^.Next;
+    While PointerJournal <> nil do
+    Begin
+        Line := IntToStr(PointerJournal^.ID) + '|||' + PointerJournal^.Account +
+        '|||' + PointerJournal^.Category + '|||' + FloatToStr(PointerJournal^.Amount) +
+        '|||' + DateToStr(PointerJournal^.Date) + '|||' + PointerJournal^.Comment;
+        Writeln(DataFile, Line);
+        PointerJournal := PointerJournal^.Next;
+    End;
+    CloseFile(DataFile);
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure SaveCategoryFile();
+Var
+    DataFile: TextFile;
+    Line: String;
+Begin
+    AssignFile(DataFile, PathCategory);
+    Rewrite(DataFile);
+    PointerCategory := HeadCategory^.Next^.Next^.Next;
+    While PointerCategory <> nil do
+    Begin
+        Line := IntToStr(PointerCategory^.ID) + '|||' + PointerCategory^.Name;
+        Writeln(DataFile, Line);
+        PointerCategory := PointerCategory^.Next;
+    End;
+    CloseFile(DataFile);
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure SaveAccountFile();
+Var
+    DataFile: TextFile;
+    Line: String;
+Begin
+    AssignFile(DataFile, PathAccount);
+    Rewrite(DataFile);
+    PointerAccount := HeadAccount^.Next;
+    While PointerAccount <> nil do
+    Begin
+        Line := IntToStr(PointerAccount^.ID) + '|||' + PointerAccount^.Name + '|||' + FloatToStr(PointerAccount^.Balance);
+        Writeln(DataFile, Line);
+        PointerAccount := PointerAccount^.Next;
+    End;
+    CloseFile(DataFile);
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.LoadChartDataOnStart();
+Begin
+    If FormMain.StringGridAccounts.RowCount > 1 then
+    Begin
+        FormMain.StringGridAccounts.Row := 1;
+        FillGridLastAccountAction (FormMain.StringGridLastAccountAction,
+                                   FormJournal.StringGridTemp,
+                                   FormMain.StringGridAccounts.Cells[AccountsColAccount, 1]);
+        FillChartTabAccounts(FormJournal.StringGridChartAcoountsTemp,
+                             FormMain.StringGridAccounts.Cells[AccountsColAccount, 1],
+                             YearNow);
+    End;
+End;
+
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonNextYearClick(Sender: TObject);
+Var
+    YearNumber: Integer;
+Begin
+    YearNumber := StrToInt(PanelTabReportYear.Caption) + 1;
+
+    If YearNumber = YearOf(now) then
+        ButtonNextYear.Enabled := False;
+
+    PanelTabReportYear.Caption := IntToStr(YearNumber);
+
+    FillChartTabReports(ChartTabReportsTop,
+                       FormJournal.StringGridChartAcoountsTemp,
+                       ComboBoxTabReportsAccount.Text,
+                       PanelTabReportYear.Caption,
+                       IntToStr(ComboBoxTabReportsMonth.ItemIndex + 1),
+                       True,
+                       True);
+    FillChartTabReports(ChartTabReportsBottom,
+                       FormJournal.StringGridChartAcoountsTemp,
+                       ComboBoxTabReportsAccount.Text,
+                       PanelTabReportYear.Caption,
+                       IntToStr(ComboBoxTabReportsMonth.ItemIndex + 1),
+                       True,
+                       False);
+
+
+
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonPrevYearClick(Sender: TObject);
+Var
+    YearNumber: Integer;
+Begin
+    YearNumber := StrToInt(PanelTabReportYear.Caption) - 1;
+    If YearNumber < YearOf(now) then
+        ButtonNextYear.Enabled := True;
+
+    PanelTabReportYear.Caption := IntToStr(YearNumber);
+
+   FillChartTabReports(ChartTabReportsTop,
+                       FormJournal.StringGridChartAcoountsTemp,
+                       ComboBoxTabReportsAccount.Text,
+                       PanelTabReportYear.Caption,
+                       IntToStr(ComboBoxTabReportsMonth.ItemIndex + 1),
+                       True,
+                       True);
+   FillChartTabReports(ChartTabReportsBottom,
+                       FormJournal.StringGridChartAcoountsTemp,
+                       ComboBoxTabReportsAccount.Text,
+                       PanelTabReportYear.Caption,
+                       IntToStr(ComboBoxTabReportsMonth.ItemIndex + 1),
+                       True,
+                       False);
+
+
+End;
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.StringGridAccountsSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+Begin
+    FillGridLastAccountAction(StringGridLastAccountAction, FormJournal.StringGridTemp, StringGridAccounts.Cells[AccountsColAccount, ARow]);
+    FillChartTabAccounts(FormJournal.StringGridChartAcoountsTemp, StringGridAccounts.Cells[AccountsColAccount, ARow], YearNow);
+
+End;
+
+
+// убрать курсор фокуса при клике в ячейку грида StringGridLastAccountAction
+Procedure TFormMain.StringGridLastAccountActionClick(Sender: TObject);
+Const
+   NoSelection : TGridRect = (Left:-1; Top:-1; Right:-1; Bottom:-1 );
+Begin
+    StringGridLastAccountAction.Selection := NoSelection;
+End;
+
+
+// убрать цвет курсора в ячейке грида StringGridLastAccountAction
+Procedure TFormMain.StringGridLastAccountActionDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+Begin
+    If (state = [gdSelected]) then
+        with TStringGrid(Sender), Canvas do
+        Begin
+            Brush.Color := Color;
+            FillRect(Rect);
+            TextRect(Rect, Rect.Left + 6, Rect.Top + 2, Cells[aCol, aRow]);
+        End;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonSaveClick(Sender: TObject);
+Begin
+   SaveAccountFile();
+   SaveCategoryFile();
+   SaveJournalFile();
+   DataHasChanged := False;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonAccountsClick(Sender: TObject);
+Begin
+    PageControlMain.ActivePage := TabAccounts;
+    SetButtonsPageAccount();
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonJournalClick(Sender: TObject);
+Begin
+    PageControlMain.ActivePage := TabJournal;
+    SetButtonsPageJournal();
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonChartClick(Sender: TObject);
+Begin
+    PageControlMain.ActivePage := TabReports;
+    SetButtonsPageChart();
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ComboBoxTabReportsAccountChange(Sender: TObject);
+Begin
+    FillChartTabReports(ChartTabReportsTop,
+                        FormJournal.StringGridChartAcoountsTemp,
+                        ComboBoxTabReportsAccount.Text,
+                        PanelTabReportYear.Caption,
+                        IntToStr(ComboBoxTabReportsMonth.ItemIndex + 1),
+                        True,
+                        True);
+    FillChartTabReports(ChartTabReportsBottom,
+                        FormJournal.StringGridChartAcoountsTemp,
+                        ComboBoxTabReportsAccount.Text,
+                        PanelTabReportYear.Caption,
+                        IntToStr(ComboBoxTabReportsMonth.ItemIndex + 1),
+                        True,
+                        False);
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ComboBoxTabReportsMonthChange(Sender: TObject);
+Begin
+
+    FillChartTabReports(ChartTabReportsTop,
+                        FormJournal.StringGridChartAcoountsTemp,
+                        ComboBoxTabReportsAccount.Text,
+                        PanelTabReportYear.Caption,
+                        IntToStr(ComboBoxTabReportsMonth.ItemIndex + 1),
+                        True,
+                        True);
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ComboBoxTabReportsAccountDropDown(Sender: TObject);
+Var
+    I: Integer;
+Begin
+    ComboBoxTabReportsAccount.Items.Clear;
+    PointerAccount := HeadAccount^.Next;
+    I := 0;
+    While (I < 5) and (PointerAccount <> nil) do
+    Begin
+        ComboBoxTabReportsAccount.Items.Add(PointerAccount^.Name);
+        PointerAccount := PointerAccount^.Next;
+        Inc(I);
+    End;
+    If PointerAccount <> nil then
+    Begin
+        If TempComboAccount <> '' then
+            ComboBoxTabReportsAccount.Items.Add(TempComboAccount);
+        ComboBoxTabReportsAccount.Items.Add('...');
+    End;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonAddClick(Sender: TObject);
+Begin
+    Case PageControlMain.TabIndex of
+        0 : FormCreateAccount.Show;
+        1 : FormCreateRecordJournal.Show;
+    End;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonDelClick(Sender: TObject);
+Begin
+    Case PageControlMain.TabIndex of
+        0 : DeleteAccountElement(StringGridAccounts.Row);
+        1 : DeleteJournalElement(StringGridJournal.Row);
+    End;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonCategoriesClick(Sender: TObject);
+Begin
+    FormCategory.Show;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonFilterClick(Sender: TObject);
+Begin
+    FormFilterJournal.Show();
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonExitClick(Sender: TObject);
+Begin
+    Close();
+End;
+
+
+Procedure DeleteAccountList();
+Begin
+    While HeadAccount^.Next <> Nil do
+    Begin
+        PointerAccount := HeadAccount;
+        DeleteCurrentOneAccountElement(PointerAccount);
+    End;
+    Dispose(HeadAccount);
+End;
+
+
+Procedure DeleteCategoryList();
+Begin
+    While HeadCategory^.Next <> Nil do
+    Begin
+        PointerCategory := HeadCategory;
+        DeleteCurrentOneCategoryElement(PointerCategory);
+    End;
+    Dispose(HeadCategory);
+End;
+
+
+Procedure DeleteJournalList();
+Begin
+    While HeadJournal^.Next <> Nil do
+    Begin
+        PointerJournal := HeadJournal;
+        DeleteCurrentOneJournalElement(PointerJournal);
+    End;
+    Dispose(HeadJournal);
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    //Сохранение настроек в INI
+    IniFile := TIniFile.Create(ExtractFilePath(ParamStr(0))+'Settings.ini');
+    IniFile.WriteString('Settings','Skin',FormSettings.ComboBoxUIStyle.Text);
+    IniFile.Free;
+
+    If DataHasChanged then
+    Begin
+        If MessageBox(Application.Handle,'Данные были изменены. Сохранить изменения?','Внимание',MB_YESNO+MB_ICONQUESTION) = IDYES then
+        Begin
+            SaveAccountFile();
+            SaveCategoryFile();
+            SaveJournalFile();
+        End;
+    End
+    Else If MessageBox(Application.Handle,'Выйти из программы?','Внимание',MB_YESNO+MB_ICONQUESTION) = IDNO then
+        Action := caNone;
+
+    DeleteAccountList();
+    DeleteCategoryList();
+    DeleteJournalList();
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.ButtonCloseProgrammClick(Sender: TObject);
+Begin
+    Close();
+End;
+
+
+
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuFileSaveClick(Sender: TObject);
+Begin
+    SaveAccountFile();
+    SaveCategoryFile();
+    SaveJournalFile();
+
+    DataHasChanged := False;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuFileExitClick(Sender: TObject);
+Begin
+    Close();
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuViewAccountsClick(Sender: TObject);
+Begin
+    ButtonAccounts.Click;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuViewJournalClick(Sender: TObject);
+Begin
+    ButtonJournal.Click;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuViewReportsClick(Sender: TObject);
+Begin
+    ButtonChart.Click;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuViewCategoriesClick(Sender: TObject);
+Begin
+    FormCategory.Show;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuToolsAddRecordClick(Sender: TObject);
+Begin
+    Case PageControlMain.TabIndex of
+        0 : FormCreateAccount.Show;
+        1 : FormCreateRecordJournal.Show;
+    End;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuToolsDelRecordClick(Sender: TObject);
+Begin
+    Case PageControlMain.TabIndex of
+        0 : DeleteAccountElement(StringGridAccounts.Row);
+        1 : DeleteJournalElement(StringGridJournal.Row);
+    End;
+End;
+
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuToolsFilterClick(Sender: TObject);
+Begin
+    FormFilterJournal.Show();
+End;
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuToolsSettingsClick(Sender: TObject);
+Begin
+    FormSettings.Show;
+End;
+
+//------------------------------------------------------------------------------
+Procedure TFormMain.MenuHelpAboutClick(Sender: TObject);
+Begin
+    FormAbout.Show;
+End;
+
+End.

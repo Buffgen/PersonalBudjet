@@ -1,0 +1,185 @@
+object FormAccount: TFormAccount
+  Left = 0
+  Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = #1057#1095#1077#1090#1072
+  ClientHeight = 364
+  ClientWidth = 667
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poScreenCenter
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 13
+  object LabelWarning: TLabel
+    Left = 152
+    Top = 304
+    Width = 324
+    Height = 19
+    Caption = #1059#1082#1072#1078#1080#1090#1077' '#1089#1091#1097#1077#1089#1090#1074#1091#1102#1097#1080#1081' '#1085#1086#1084#1077#1088' '#1089#1095#1105#1090#1072'!'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clRed
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    Visible = False
+  end
+  object LabelActionAccount: TLabel
+    Left = 29
+    Top = 255
+    Width = 127
+    Height = 16
+    Caption = #1048#1079#1084#1077#1085#1077#1085#1080#1077' '#1089#1095#1077#1090#1086#1074':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelIndex: TLabel
+    Left = 174
+    Top = 255
+    Width = 21
+    Height = 16
+    Caption = #8470':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelNumber: TLabel
+    Left = 244
+    Top = 255
+    Width = 36
+    Height = 16
+    Caption = #1057#1095#1105#1090':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object LabelBalance: TLabel
+    Left = 430
+    Top = 255
+    Width = 49
+    Height = 16
+    Caption = #1057#1091#1084#1084#1072':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clTeal
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object StringGridAccount: TStringGrid
+    Left = 136
+    Top = 8
+    Width = 483
+    Height = 217
+    ColCount = 3
+    DefaultColWidth = 144
+    FixedCols = 0
+    RowCount = 8
+    FixedRows = 0
+    TabOrder = 0
+    OnDrawCell = StringGridAccountDrawCell
+    OnSelectCell = StringGridAccountSelectCell
+    RowHeights = (
+      24
+      24
+      24
+      24
+      24
+      24
+      24
+      24)
+  end
+  object ButtonExecute: TButton
+    Left = 544
+    Top = 304
+    Width = 96
+    Height = 31
+    Caption = #1042#1099#1087#1086#1083#1085#1080#1090#1100
+    Enabled = False
+    TabOrder = 1
+    OnClick = ButtonExecuteClick
+  end
+  object ComboBoxParameters: TComboBox
+    Left = 28
+    Top = 277
+    Width = 128
+    Height = 21
+    ItemIndex = 0
+    TabOrder = 2
+    Text = #1055#1086#1087#1086#1083#1085#1080#1090#1100' '#1089#1095#1105#1090
+    OnChange = ComboBoxParametersChange
+    OnClick = ComboBoxParametersClick
+    OnKeyPress = ComboBoxParametersKeyPress
+    Items.Strings = (
+      #1055#1086#1087#1086#1083#1085#1080#1090#1100' '#1089#1095#1105#1090
+      #1057#1086#1079#1076#1072#1090#1100' '#1089#1095#1105#1090
+      #1059#1076#1072#1083#1080#1090#1100' '#1089#1095#1105#1090)
+  end
+  object EditIndex: TEdit
+    Left = 174
+    Top = 277
+    Width = 50
+    Height = 21
+    Enabled = False
+    MaxLength = 5
+    TabOrder = 3
+    OnChange = EditIndexChange
+    OnKeyPress = EditIndexKeyPress
+  end
+  object EditNumber: TEdit
+    Left = 244
+    Top = 277
+    Width = 180
+    Height = 21
+    Enabled = False
+    MaxLength = 20
+    TabOrder = 4
+    OnChange = EditNumberChange
+  end
+  object EditBalance: TEdit
+    Left = 430
+    Top = 277
+    Width = 210
+    Height = 21
+    Enabled = False
+    MaxLength = 8
+    TabOrder = 5
+    OnChange = EditBalanceChange
+    OnKeyPress = EditBalanceKeyPress
+  end
+  object ButtonCreate: TButton
+    Left = 29
+    Top = 40
+    Width = 75
+    Height = 25
+    Caption = #1057#1086#1079#1076#1072#1090#1100
+    TabOrder = 6
+    OnClick = ButtonCreateClick
+  end
+  object ButtonDelete: TButton
+    Left = 29
+    Top = 88
+    Width = 75
+    Height = 25
+    Caption = #1059#1076#1072#1083#1080#1090#1100
+    TabOrder = 7
+    OnClick = ButtonDeleteClick
+  end
+end

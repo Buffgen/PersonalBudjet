@@ -1,0 +1,165 @@
+Unit IncomeJournal;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls, ChoiceAccount, Vcl.ComCtrls,
+  Vcl.ExtCtrls, Vcl.Buttons;
+
+Type
+    TFormIncomeJournal = class(TForm)
+        ComboBoxAccount: TComboBox;
+        EditAmount: TEdit;
+        LabelAccount: TLabel;
+        LabelAmount: TLabel;
+        LabelDate: TLabel;
+        LabelComment: TLabel;
+        EditComment: TEdit;
+        DateTimePickerJournal: TDateTimePicker;
+    ComboBoxAction: TComboBox;
+    Panel_CreateRecordJournal: TPanel;
+    LabelActionType: TLabel;
+    ButtonAdd: TSpeedButton;
+    ButtonExit: TSpeedButton;
+    Procedure FormShow(Sender: TObject);
+    Procedure EditAmountKeyPress(Sender: TObject; var Key: Char);
+    Procedure ComboBoxAccountDropDown(Sender: TObject);
+    Procedure ComboBoxAccountChange(Sender: TObject);
+    Procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    Procedure ButtonAddClick(Sender: TObject);
+
+    Private
+        Procedure AddNewJournalElement();
+      //  Procedure AddNewJournalStringGrid();
+
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormIncomeJournal: TFormIncomeJournal;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, Journal;
+
+
+
+
+Procedure TFormIncomeJournal.FormShow(Sender: TObject);
+Begin
+    LabelActionType.StyleElements := LabelActionType.StyleElements - [seFont];
+    LabelActionType.Font.Color := clTeal;
+    LabelAccount.StyleElements := LabelAccount.StyleElements - [seFont];
+    LabelAccount.Font.Color := clTeal;
+    LabelAmount.StyleElements := LabelAmount.StyleElements - [seFont];
+    LabelAmount.Font.Color := clTeal;
+    LabelDate.StyleElements := LabelDate.StyleElements - [seFont];
+    LabelDate.Font.Color := clTeal;
+    LabelComment.StyleElements := LabelComment.StyleElements - [seFont];
+    LabelComment.Font.Color := clTeal;
+    ComboBoxAction.ItemIndex := -1;
+    ComboBoxAccount.ItemIndex := -1;
+    EditAmount.Clear;
+    DateTimePickerJournal.Date := Now;
+    EditComment.Clear;
+    ButtonAdd.Enabled := False;
+    TempComboAccount := '';
+End;
+
+
+Procedure TFormIncomeJournal.EditAmountKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := CheckKeyEditMoney(EditAmount.Text, EditAmount.SelStart, EditAmount.SelLength, Key);
+End;
+
+
+Procedure TFormIncomeJournal.AddNewJournalElement();
+Begin
+    DataHasChanged := True;
+    Inc(MaxJournalID);
+    PointerJournal := TailJournal;
+    New(PointerJournal^.Next);
+    PointerJournal := PointerJournal^.Next;
+    PointerJournal^.Next := Nil;
+    PointerJournal^.ID := MaxJournalID;
+    PointerJournal^.Account := ComboBoxAccount.Text;
+    PointerJournal^.Category := HeadCategory^.Next^.Name;
+    PointerJournal^.Amount := StrToFloat(EditAmount.Text);
+    PointerJournal^.Date := DateTimePickerJournal.Date;
+    PointerJournal^.Comment := EditComment.Text;
+    TailJournal := PointerJournal;
+    HeadJournal^.ID := HeadJournal^.ID + 1;
+    FindLineInAccountList(TailJournal^.Account, TailJournal^.Amount, True);
+End;
+
+
+//Procedure TFormIncomeJournal.AddNewJournalStringGrid();
+//Begin
+//    With StringGridJournal do
+//    Begin
+//        RowCount :=  RowCount + 1;
+//        Cells[0, RowCount - 1] := IntToStr(TailJournal^.ID);
+//        Cells[1, RowCount - 1] := TailJournal^.Account;
+//        Cells[2, RowCount - 1] := '+' + FloatToStr(TailJournal^.Amount);
+//        Cells[3, RowCount - 1] := DateTimeToStr(TailJournal^.Date);
+//        Cells[4, RowCount - 1] := TailJournal^.Comment;
+//    End;
+//End;
+
+
+Procedure TFormIncomeJournal.ButtonAddClick(Sender: TObject);
+Begin
+    AddNewJournalElement();
+    ComboBoxAction.ItemIndex := -1;
+    ComboBoxAccount.ItemIndex := -1;
+    EditAmount.Clear;
+    EditComment.Clear;
+End;
+
+
+Procedure TFormIncomeJournal.ComboBoxAccountDropDown(Sender: TObject);
+    Var
+    I: Integer;
+Begin
+    ComboBoxAccount.Items.Clear;
+    PointerAccount := HeadAccount^.Next;
+    I := 0;
+    While (I < 5) and (PointerAccount <> nil) do
+    Begin
+        ComboBoxAccount.Items.Add(PointerAccount^.Name);
+        PointerAccount := PointerAccount^.Next;
+        Inc(I);
+    End;
+    If PointerAccount <> nil then
+    Begin
+        If TempComboAccount <> '' then
+            ComboBoxAccount.Items.Add(TempComboAccount);
+        ComboBoxAccount.Items.Add('ƒругой счЄт...');
+    End;
+End;
+
+
+Procedure TFormIncomeJournal.ComboBoxAccountChange(Sender: TObject);
+Begin
+    If TempComboAccount <> '' then
+    Begin
+        If ComboBoxAccount.ItemIndex = 6 then
+            FormChoiceAccount.Show
+    End
+    Else If ComboBoxAccount.ItemIndex = 5 then
+        FormChoiceAccount.Show
+End;
+
+
+Procedure TFormIncomeJournal.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    FillJournal(FormMain.StringGridJournal);
+    TempComboAccount := '';
+    ComboBoxAccount.ItemIndex := -1;
+End;
+
+End.

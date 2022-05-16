@@ -1,0 +1,766 @@
+Unit FilterJournal;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.CheckLst, Vcl.Grids,
+    Vcl.ComCtrls, DateUtils, Vcl.ExtCtrls, Vcl.Buttons;
+
+Type
+    TStringArr = Array of String;
+
+    TFormFilterJournal = class(TForm)
+    EditAccount: TEdit;
+    LabelInfoAccount: TLabel;
+    LabelInfoCategory: TLabel;
+    LabelInfoAmount: TLabel;
+    LabelInfoDate: TLabel;
+    LabelInfoComment: TLabel;
+    ComboBoxAmount: TComboBox;
+    ComboBoxDate: TComboBox;
+    EditCategory: TEdit;
+    EditAmountFirst: TEdit;
+    EditComment: TEdit;
+    EditAmountSecond: TEdit;
+    CheckBoxAccount: TCheckBox;
+    CheckBoxCategory: TCheckBox;
+    CheckBoxAmount: TCheckBox;
+    CheckBoxDate: TCheckBox;
+    CheckBoxComment: TCheckBox;
+    DateTimePickerFirst: TDateTimePicker;
+    DateTimePickerSecond: TDateTimePicker;
+    ComboBoxOperation: TComboBox;
+    PanelFilterJournal: TPanel;
+    ButtonExit: TSpeedButton;
+    ButtonAdd: TSpeedButton;
+    SpeedButtonReset: TSpeedButton;
+    Procedure ButtonConfirmClick(Sender: TObject);
+    Procedure FormShow(Sender: TObject);
+    Procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    Procedure ButtonCancelClick(Sender: TObject);
+    Procedure EditAmountFirstKeyPress(Sender: TObject; var Key: Char);
+    Procedure EditAmountSecondKeyPress(Sender: TObject; var Key: Char);
+    procedure ComboBoxAmountChange(Sender: TObject);
+    procedure ComboBoxDateChange(Sender: TObject);
+    procedure ComboBoxOperationChange(Sender: TObject);
+    procedure ButtonAddClick(Sender: TObject);
+    procedure ButtonExitClick(Sender: TObject);
+    procedure SpeedButtonResetClick(Sender: TObject);
+    procedure ComboBoxOperationKeyPress(Sender: TObject; var Key: Char);
+    procedure ComboBoxAmountKeyPress(Sender: TObject; var Key: Char);
+    procedure ComboBoxDateKeyPress(Sender: TObject; var Key: Char);
+    procedure ComboBoxDateKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure ComboBoxOperationKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure ComboBoxAmountKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+
+    Private
+
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormFilterJournal: TFormFilterJournal;
+
+Implementation
+    {$R *.dfm}
+
+
+Uses
+    Main, Journal, UnitProcedure;
+
+
+Var
+    ArrFilters: Array[0..10] of String;
+    ArrCheckBoxes: Array[0..5] of Boolean;
+    IsConfirm: Boolean;
+
+
+
+
+
+
+
+//==============================================================================
+Procedure TFormFilterJournal.FormShow(Sender: TObject);
+Begin
+    IsConfirm := False;
+
+    If Not CheckBoxAccount.Checked then
+        EditAccount.Clear;
+
+    If Not CheckBoxCategory.Checked then
+        EditCategory.Clear;
+
+    If Not CheckBoxAmount.Checked then
+    Begin
+        EditAmountFirst.Clear;
+        EditAmountSecond.Clear;
+        EditAmountFirst.Visible := False;
+        EditAmountSecond.Visible := False;
+        ComboBoxAmount.ItemIndex := -1;
+        ComboBoxAmount.Visible := False;
+    End;
+
+    If Not CheckBoxDate.Checked then
+    Begin
+        ComboBoxDate.ItemIndex := -1;
+        DateTimePickerFirst.Date := Now;
+        DateTimePickerSecond.Date := Now;
+        DateTimePickerFirst.Visible := False;
+        DateTimePickerSecond.Visible := False;
+    End;
+
+    If Not CheckBoxComment.Checked then
+    Begin
+        EditComment.Clear
+    End;
+
+
+    ArrFilters[0] := EditAccount.Text;
+    ArrFilters[1] := EditCategory.Text;
+    ArrFilters[2] := IntToStr(ComboBoxOperation.ItemIndex);
+    ArrFilters[3] := IntToStr(ComboBoxAmount.ItemIndex);
+    ArrFilters[4] := EditAmountFirst.Text;
+    ArrFilters[5] := EditAmountSecond.Text;
+    ArrFilters[6] := IntToStr(ComboBoxDate.ItemIndex);
+    ArrFilters[7] := DateToStr(DateTimePickerFirst.Date);
+    ArrFilters[8] := DateToStr(DateTimePickerSecond.Date);
+    ArrFilters[9] := EditComment.Text;
+
+    ArrCheckBoxes[0] := CheckBoxAccount.Checked;
+    ArrCheckBoxes[1] := CheckBoxCategory.Checked;
+    ArrCheckBoxes[2] := CheckBoxAmount.Checked;
+    ArrCheckBoxes[3] := CheckBoxDate.Checked;
+    ArrCheckBoxes[4] := CheckBoxComment.Checked;
+End;
+
+
+Procedure TFormFilterJournal.SpeedButtonResetClick(Sender: TObject);
+Begin
+    EditAccount.Clear;
+    CheckBoxAccount.Checked := False;
+    EditCategory.Clear;
+    CheckBoxCategory.Checked := False;
+    ComboBoxOperation.Text := 'Вид операциии';
+    ComboBoxAmount.Text := 'Условие';
+    EditAmountFirst.Clear;
+    EditAmountSecond.Clear;
+    CheckBoxAmount.Checked := False;
+    ComboBoxDate.Text := 'Условие';
+    DateTimePickerFirst.Date := Date;
+    DateTimePickerSecond.Date := Date;
+    CheckBoxDate.Checked := False;
+    EditComment.Clear;
+    CheckBoxComment.Checked := False;
+End;
+
+
+//==============================================================================
+Procedure StringEquals(Var StringGridJournal: TStringGrid; Line: String; Column: Integer);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If Pos(AnsiUpperCase(Line), AnsiUpperCase(StringGridJournal.Cells[Column, I])) <> 0 then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+//==============================================================================
+Procedure AmountEquals(Var StringGridJournal: TStringGrid; EditAmountFirst: TEdit);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If (StringGridJournal.Cells[3, I] = EditAmountFirst.Text) or (StringGridJournal.Cells[3, I] = '-' + EditAmountFirst.Text) then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+Procedure AmountLess(Var StringGridJournal: TStringGrid; EditAmountFirst: TEdit);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If Abs(StrToFloat(StringGridJournal.Cells[3, I])) < StrToFloat(EditAmountFirst.Text) then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+Procedure AmountAbove(Var StringGridJournal: TStringGrid; EditAmountFirst: TEdit);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If Abs(StrToFloat(StringGridJournal.Cells[3, I])) > StrToFloat(EditAmountFirst.Text) then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+Procedure AmountRange(Var StringGridJournal: TStringGrid; EditAmountFirst, EditAmountSecond: TEdit);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If (Abs(StrToFloat(StringGridJournal.Cells[3, I])) > StrToFloat(EditAmountFirst.Text))
+        and (Abs(StrToFloat(StringGridJournal.Cells[3, I])) < StrToFloat(EditAmountSecond.Text)) then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+
+Procedure AmountIsIncome(Var StringGridJournal: TStringGrid; Column: Integer);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If StrToFloat(StringGridJournal.Cells[Column, I]) > 0 then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I)
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+Procedure AmountIsExpense(Var StringGridJournal: TStringGrid; Column: Integer);
+Var
+    I, J: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If StrToFloat(StringGridJournal.Cells[Column, I]) < 0 then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I)
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+Procedure ChoiceIncomeOrExpense(Var StringGridJournal: TStringGrid; Var ComboBoxOperation: TComboBox);
+Var
+    I: Integer;
+Begin
+    If ComboBoxOperation.ItemIndex = 0 then
+        AmountIsIncome(StringGridJournal, 3)
+    Else
+        AmountIsExpense(StringGridJournal, 3);
+End;
+
+
+Procedure SelectWithAmount(Var StringGridJournal: TStringGrid; Var ComboBoxAmount, ComboBoxOperation: TComboBox; Var EditAmountFirst, EditAmountSecond: TEdit);
+Var
+    I, J: Integer;
+Begin
+    ChoiceIncomeOrExpense(StringGridJournal, ComboBoxOperation);
+
+    Case ComboBoxAmount.ItemIndex of
+        0: AmountEquals(StringGridJournal, EditAmountFirst);
+        1: AmountLess(StringGridJournal, EditAmountFirst);
+        2: AmountAbove(StringGridJournal, EditAmountFirst);
+        3: AmountRange(StringGridJournal, EditAmountFirst, EditAmountSecond);
+    End;
+End;
+
+
+//==============================================================================
+Procedure DateEquals(Var StringGridJournal: TStringGrid; Var DateTimePickerFirst: TDateTimePicker);
+Var
+    I: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If StrToDate(StringGridJournal.Cells[4, I]) = DateTimePickerFirst.Date then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+Procedure DateLess(Var StringGridJournal: TStringGrid; Var DateTimePickerFirst: TDateTimePicker);
+Var
+    I: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If StrToDate(StringGridJournal.Cells[4, I]) < DateTimePickerFirst.Date then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+Procedure DateAbove(Var StringGridJournal: TStringGrid; Var DateTimePickerFirst: TDateTimePicker);
+Var
+    I: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If StrToDate(StringGridJournal.Cells[4, I]) > DateTimePickerFirst.Date then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+Procedure DateRange(Var StringGridJournal: TStringGrid; Var DateTimePickerFirst, DateTimePickerSecond: TDateTimePicker);
+Var
+    I: Integer;
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    For I := 1 to StringGridJournal.RowCount - 1 do
+    Begin
+        If (StrToDate(StringGridJournal.Cells[4, I]) >= DateTimePickerFirst.Date)
+        and (StrToDate(StringGridJournal.Cells[4, I]) <= DateTimePickerSecond.Date) then
+            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+    End;
+    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+End;
+
+
+Procedure SelectWithDate(Var StringGridJournal: TStringGrid; Var ComboBoxDate: TComboBox;
+Var DateTimePickerFirst, DateTimePickerSecond: TDateTimePicker);
+Var
+    I, J: Integer;
+Begin
+    Case ComboBoxDate.ItemIndex of
+        0: DateEquals(StringGridJournal, DateTimePickerFirst);
+        1: DateLess(StringGridJournal, DateTimePickerFirst);
+        2: DateAbove(StringGridJournal, DateTimePickerFirst);
+        3: DateRange(StringGridJournal, DateTimePickerFirst, DateTimePickerSecond);
+    End;
+End;
+
+
+//==============================================================================
+Procedure TFormFilterJournal.ButtonConfirmClick(Sender: TObject);
+Var
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    FillJournal(FormMain.StringGridJournal);
+    If CheckBoxAccount.Checked then
+        StringEquals(FormMain.StringGridJournal, EditAccount.Text, 1);
+    If CheckBoxCategory.Checked then
+        StringEquals(FormMain.StringGridJournal, EditCategory.Text, 2);
+    If CheckBoxAmount.Checked then
+        SelectWithAmount(FormMain.StringGridJournal, ComboBoxAmount, ComboBoxOperation, EditAmountFirst, EditAmountSecond);
+    If CheckBoxDate.Checked then
+        SelectWithDate(FormMain.StringGridJournal, ComboBoxDate, DateTimePickerFirst, DateTimePickerSecond);
+    If CheckBoxComment.Checked then
+        StringEquals(FormMain.StringGridJournal, EditComment.Text, 5);
+
+    IsConfirm := True;
+    Close();
+End;
+
+
+Procedure TFormFilterJournal.ButtonExitClick(Sender: TObject);
+Begin
+    Close();
+End;
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+//Function StringMatch(Var StringGridJournal: TStringGrid; InputAccount: String): String;
+//Var
+//    I: Integer;
+//Begin
+//    SetLength(StringMatrix, 0, 0);
+//    For I := 1 to StringGridJournal.RowCount - 1 do
+//    Begin
+//        If StringGridJournal.Cells[1, I] = InputAccount then
+//            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+//    End;
+//End;
+//
+//
+//Function DefiniteYear(InputDate: String): String;
+//Var
+//    I: Integer;
+//    OutputString: String;
+//Begin
+//    OutputString := '';
+//    I := Length(InputDate);
+//    While (InputDate[I] <> '.') and (I <> 0) do
+//        Dec(I);
+//
+//    OutputString := Copy(InputDate, I + 1, Length(InputDate));
+//    DefiniteYear := OutputString;
+//End;
+//
+//
+//Procedure YearEquals(Var StringGridJournal: TStringGrid; InputYear: String);
+//Var
+//    I: Integer;
+//Begin
+//    For I := 1 to StringGridJournal.RowCount - 1 do
+//    Begin
+//        If DefiniteYear(StringGridJournal.Cells[4, I]) = InputYear then
+//            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+//    End;
+//End;
+//
+//
+//Procedure FillPrepareMonthsMatrix(IsMonthColumn: Boolean);
+//Var
+//    I, J: Integer;
+//Begin
+//    For I := 0 to High(StringMatrix) do
+//        For J := 0 to High(StringMatrix[0]) do
+//            If (J = 0) and IsMonthColumn then
+//                StringMatrix[I,J] := IntToStr(I + 1)
+//            Else
+//                StringMatrix[I,J] := IntToStr(0)
+//End;
+//
+//
+//Procedure FillMatrixMonthsInYear(Var StringGridJournal: TStringGrid);
+//Var
+//    I, J, Month: Integer;
+//Begin
+//    SetLength(StringMatrix, 12, 3);
+//    FillPrepareMonthsMatrix(True);
+//    For I := 1 to StringGridJournal.RowCount - 1 do
+//    Begin
+//        Month := StrToInt(Copy(StringGridJournal.Cells[4, I], Pos('.', StringGridJournal.Cells[4, I]) + 1, 2));
+//        If StrToFloat(StringGridJournal.Cells[3, I]) < 0 then
+//            StringMatrix[Month - 1, 2] := FloatToStr(StrToFloat(StringMatrix[Month - 1, 2]) + Abs(StrToFloat(StringGridJournal.Cells[3, I])))
+//        Else
+//            StringMatrix[Month - 1, 1] := FloatToStr(StrToFloat(StringMatrix[Month - 1, 1]) + StrToFloat(StringGridJournal.Cells[3, I]))
+//    End;
+//End;
+//
+//
+//Function ActionMonthsInYear(Var StringGridJournal: TStringGrid; InputAccount, InputYear: String): TStringMatrix;
+//Begin
+//    SetLength(StringMatrix, 0, 0);
+//    DataFromListToGrid(StringGridJournal);
+//    StringMatch(StringGridJournal, InputAccount);
+//    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+//    YearEquals(StringGridJournal, InputYear);
+//    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+//    FillMatrixMonthsInYear(StringGridJournal);
+//    ActionMonthsInYear := StringMatrix;
+//
+//End;
+//
+//
+//Procedure FillMatrixLastOperation(Var StringGridJournal: TStringGrid);
+//Var
+//    I, MaxIndex: Integer;
+//    MaxDate: TDate;
+//Begin
+//    SetLength(StringMatrix, 0, 0);
+//    MaxDate := StrToDate('30.12.1899');
+//    For I := 1 to StringGridJournal.RowCount - 1 do
+//    Begin
+//        If MaxDate <= StrToDate(StringGridJournal.Cells[4, I]) then
+//        Begin
+//            MaxIndex := I;
+//            MaxDate := StrToDate(StringGridJournal.Cells[4, I]);
+//        End;
+//    End;
+//    DataFromRecordToMatrix(StringGridJournal, StringMatrix, MaxIndex);
+//End;
+//
+//
+//Function ActionLastOperation(Var StringGridJournal: TStringGrid; InputAccount: String): TStringMatrix;
+//Begin
+//    SetLength(StringMatrix, 0, 0);
+//    DataFromListToGrid(StringGridJournal);
+//    StringMatch(StringGridJournal, InputAccount);
+//    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+//    FillMatrixLastOperation(StringGridJournal);
+//    ActionLastOperation := StringMatrix;
+//End;
+//
+//
+//Procedure MonthAndYearEquals(Var StringGridJournal: TStringGrid; Year, Month: String);
+//Var
+//    I: Integer;
+//Begin
+//    For I := 1 to StringGridJournal.RowCount - 1 do
+//    Begin
+//        If (YearOf(StrToDate(StringGridJournal.Cells[4, I])) = StrToInt(Year)) and (MonthOf(StrToDate(StringGridJournal.Cells[4, I])) = StrToInt(Month)) then
+//            DataFromRecordToMatrix(StringGridJournal, StringMatrix, I);
+//    End;
+//End;
+//
+//
+//Procedure PrepareArrBoolean(Var ArrBoolean: Array of Boolean);
+//Var
+//    I: Integer;
+//Begin
+//    For I := 0 to High(ArrBoolean) do
+//        ArrBoolean[I] := True;
+//End;
+//
+//Procedure FillMatrixCategoryOfAccount(Var StringGridJournal: TStringGrid);
+//Var
+//    I, J, Counter: Integer;
+//    ArrBoolean: Array of Boolean;
+//Begin
+//    SetLength(StringMatrix, 0, 0);
+//    SetLength(ArrBoolean, StringGridJournal.RowCount - 1);
+//    PrepareArrBoolean(ArrBoolean);
+//    Counter := 0;
+//    For I := 1 to StringGridJournal.RowCount - 1 do
+//    Begin
+//        If (ArrBoolean[I - 1]) and (StringGridJournal.Cells[2, I] <> HeadCategory^.Next^.Name) then
+//        Begin
+//            Inc(Counter);
+//            SetLength(StringMatrix, Counter, 2);
+//            StringMatrix[Counter - 1, 0] := StringGridJournal.Cells[2, I];
+//            StringMatrix[Counter - 1, 1] := '0';
+//            For J := I to StringGridJournal.RowCount - 1 do
+//            Begin
+//                If StringGridJournal.Cells[2, J] = StringGridJournal.Cells[2, I] then
+//                Begin
+//                    If StrToFloat(StringGridJournal.Cells[3, J]) < 0 then
+//                        StringMatrix[Counter - 1, 1] := FloatToStr(StrToFloat(StringMatrix[Counter - 1, 1]) + Abs(StrToFloat(StringGridJournal.Cells[3, J])));
+//                    ArrBoolean[J - 1] := False;
+//                End;
+//            End;
+//        End;
+//    End;
+//End;
+//
+//Function ActionCategoryOfAccount(Var StringGridJournal: TStringGrid; InputAccount, Year, Month: String; IsAccount: Boolean): TStringMatrix;
+//Begin
+//    SetLength(StringMatrix, 0, 0);
+//    DataFromListToGrid(StringGridJournal);
+//    If IsAccount then
+//    Begin
+//        StringMatch(StringGridJournal, InputAccount);
+//        DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+//    End;
+//    MonthAndYearEquals(StringGridJournal, Year, Month);
+//    DataFromMatrixToGrid(StringGridJournal, StringMatrix);
+//    FillMatrixCategoryOfAccount(StringGridJournal);
+//    ActionCategoryOfAccount := StringMatrix;
+//End;
+
+//Вход: счёт, год, мессяц. Выход: категория, сумма расхода
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Procedure TFormFilterJournal.ComboBoxAmountChange(Sender: TObject);
+Begin
+    If ComboBoxAmount.ItemIndex = 3 then
+    Begin
+        EditAmountFirst.Enabled := True;
+        EditAmountFirst.Visible := True;
+        EditAmountFirst.Clear;
+
+        EditAmountSecond.Enabled := True;
+        EditAmountSecond.Visible := True;
+        EditAmountSecond.Clear;
+    End
+    Else
+    Begin
+        EditAmountFirst.Enabled := True;
+        EditAmountFirst.Visible := True;
+        EditAmountFirst.Clear;
+
+        EditAmountSecond.Enabled := False;
+        EditAmountSecond.Visible := False;
+        EditAmountSecond.Clear;
+    End;
+End;
+
+
+
+
+Procedure TFormFilterJournal.ComboBoxDateChange(Sender: TObject);
+Begin
+    If ComboBoxDate.ItemIndex = 3 then
+        Begin
+        DateTimePickerFirst.Enabled := True;
+        DateTimePickerFirst.Visible := True;
+
+        DateTimePickerSecond.Enabled := True;
+        DateTimePickerSecond.Visible := True;
+
+    End
+    Else
+    Begin
+        DateTimePickerFirst.Enabled := True;
+        DateTimePickerFirst.Visible := True;
+
+        DateTimePickerSecond.Enabled := False;
+        DateTimePickerSecond.Visible := False;
+    End;
+End;
+
+
+
+
+Procedure TFormFilterJournal.ComboBoxOperationChange(Sender: TObject);
+Begin
+    If ComboBoxOperation.ItemIndex >= 0 then
+        ComboBoxAmount.Visible := True
+    Else
+        ComboBoxAmount.Visible := False;
+End;
+
+
+Procedure TFormFilterJournal.ComboBoxDateKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+Begin
+    If Key = VK_Delete then Key:=0;
+End;
+
+
+Procedure TFormFilterJournal.ComboBoxDateKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := #0;
+End;
+
+
+Procedure TFormFilterJournal.ComboBoxOperationKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+Begin
+    If Key = VK_Delete then Key:=0;
+End;
+
+
+Procedure TFormFilterJournal.ComboBoxOperationKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := #0;
+End;
+
+
+Procedure TFormFilterJournal.ComboBoxAmountKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+Begin
+    If Key = VK_Delete then Key:=0;
+End;
+
+
+Procedure TFormFilterJournal.ComboBoxAmountKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := #0;
+End;
+
+
+Procedure TFormFilterJournal.EditAmountFirstKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := CheckKeyEditMoney(EditAmountFirst.Text, EditAmountFirst.SelStart, EditAmountFirst.SelLength, Key);
+End;
+
+Procedure TFormFilterJournal.EditAmountSecondKeyPress(Sender: TObject; var Key: Char);
+Begin
+    Key := CheckKeyEditMoney(EditAmountSecond.Text, EditAmountSecond.SelStart, EditAmountSecond.SelLength, Key);
+End;
+
+
+
+//==============================================================================
+Procedure TFormFilterJournal.ButtonAddClick(Sender: TObject);
+Var
+    StringMatrix: TStringMatrix;
+Begin
+    SetLength(StringMatrix, 0, 0);
+    FillJournal(FormMain.StringGridJournal);
+    If CheckBoxAccount.Checked then
+        StringEquals(FormMain.StringGridJournal, EditAccount.Text, 1);
+    If CheckBoxCategory.Checked then
+        StringEquals(FormMain.StringGridJournal, EditCategory.Text, 2);
+    If CheckBoxAmount.Checked then
+        SelectWithAmount(FormMain.StringGridJournal, ComboBoxAmount, ComboBoxOperation, EditAmountFirst, EditAmountSecond);
+    If CheckBoxDate.Checked then
+        SelectWithDate(FormMain.StringGridJournal, ComboBoxDate, DateTimePickerFirst, DateTimePickerSecond);
+    If CheckBoxComment.Checked then
+        StringEquals(FormMain.StringGridJournal, EditComment.Text, 5);
+
+    IsConfirm := True;
+    Close();
+End;
+
+
+
+Procedure TFormFilterJournal.ButtonCancelClick(Sender: TObject);
+Begin
+    Close();
+End;
+
+
+Procedure TFormFilterJournal.FormClose(Sender: TObject; var Action: TCloseAction);
+Begin
+    If Not IsConfirm then
+    Begin
+        EditAccount.Text := ArrFilters[0];
+        EditCategory.Text := ArrFilters[1];
+        ComboBoxOperation.ItemIndex := StrToInt(ArrFilters[2]);
+        ComboBoxAmount.ItemIndex := StrToInt(ArrFilters[3]);
+        EditAmountFirst.Text := ArrFilters[4];
+        EditAmountSecond.Text := ArrFilters[5];
+        ComboBoxDate.ItemIndex := StrToInt(ArrFilters[6]);
+        DateTimePickerFirst.Date := StrToDate(ArrFilters[7]);
+        DateTimePickerSecond.Date := StrToDate(ArrFilters[8]);
+        EditComment.Text := ArrFilters[9];
+
+        CheckBoxAccount.Checked := ArrCheckBoxes[0];
+        CheckBoxCategory.Checked := ArrCheckBoxes[1];
+        CheckBoxAmount.Checked := ArrCheckBoxes[2];
+        CheckBoxDate.Checked := ArrCheckBoxes[3];
+        CheckBoxComment.Checked := ArrCheckBoxes[4];
+    End;
+End;
+
+End.

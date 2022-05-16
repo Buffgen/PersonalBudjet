@@ -1,0 +1,37 @@
+Unit IncomeJournal;
+
+Interface
+
+Uses
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, Vcl.StdCtrls;
+
+Type
+    TFormIncomeJournal = class(TForm)
+        StringGridJournal: TStringGrid;
+    ComboBoxAccount: TComboBox;
+    EditAmount: TEdit;
+    ButtonExecute: TButton;
+    LabelAccount: TLabel;
+    LabelAmount: TLabel;
+    EditDate: TEdit;
+    LabelDate: TLabel;
+
+    Private
+        { Private declarations }
+    Public
+        { Public declarations }
+    End;
+
+Var
+    FormIncomeJournal: TFormIncomeJournal;
+
+Implementation
+    {$R *.dfm}
+
+Uses
+    Main, UnitProcedure, Journal;
+
+
+
+End.
